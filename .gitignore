@@ -1,0 +1,39 @@
+# -------------------------------------------------------
+# MATLAB .gitignore
+# -------------------------------------------------------
+
+# MATLAB automatically generated files
+*.asv             # Autosave files
+*.m~              # Temporary m-files
+*.mex*            # Compiled MEX files
+*.p               # Protected MATLAB files
+*.slprj/          # Simulink Project Cache
+*.autosave        # Simulink Autosave files
+*.mdl.r20*        # Old Simulink backup files
+*.slx.r20*        # Old Simulink backup files
+*.bak             # Backup files
+
+# MATLAB cache and temporary folders
+cache/
+codegen/
+slprj/
+work/
+mex/
+tmp/
+temp/
+
+# MATLAB Live Script autosave files
+*.mlx.autosave
+*.asv
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# -------------------------------------------------------
+# Custom project structure
+# -------------------------------------------------------
+
+# Exclude the entire resources folder and its contents
+resources/
+
