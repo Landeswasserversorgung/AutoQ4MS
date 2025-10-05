@@ -4,6 +4,8 @@
 % 2. Creating necessary database tables
 % 3. Generating a Windows batch file to start the application
 % 4. Creating a desktop shortcut for launching the app
+%% 
+setup()
 
 %% Setup
 thisFile = mfilename('fullpath');
@@ -14,7 +16,9 @@ disp('Installation is executed');
 
 %% Load Parameters
 % Load application settings from .mat file
-load('..\data\Import\methods\Parameters.mat');  % Structure with parameters to run the application
+Parameters_struct
+setup()
+load('data\Import\methods\Parameters.mat');  % Structure with parameters to run the application
 
 %% Optional: Edit Parameters via GUI
 editParameters = editParametersGUI(Parameters);

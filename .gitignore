@@ -21,6 +21,7 @@ work/
 mex/
 tmp/
 temp/
+data/import/mslib/
 
 # MATLAB Live Script autosave files
 *.mlx.autosave
@@ -36,4 +37,18 @@ Thumbs.db
 
 # Exclude the entire resources folder and its contents
 resources/
+
+*.sql
+*.log
+!PivotQueryTemplate.sql
+*.xlsx
+!Components_template.xlsx
+!InternalStandards_template.xlsx
+*.html
+!emailstartTemplate.html
+*.mat
+*.bat
+!template.bat
+
+
 
