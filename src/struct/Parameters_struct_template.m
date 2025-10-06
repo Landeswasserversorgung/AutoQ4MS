@@ -21,9 +21,9 @@ Parameters.isOn.deletemzXML = false;
 
 % Base tools and executable paths
 
-Parameters.path.MATLABexe = "Test";
-Parameters.path.proteoWizard = "";
-Parameters.path.psqlExe = "";
+Parameters.path.MATLABexe = "Test";% matlab.exe
+Parameters.path.proteoWizard = "";% msconvert.exe
+Parameters.path.psqlExe = "";% psql.exe
 Parameters.path.desktop = "";
 % MS Data source and archive
 Parameters.path.MSDataSource = "";
@@ -52,12 +52,12 @@ Parameters.Mail.Receiver = [""] ;
 Parameters.Mail.Sender = "";
 %% ========== 3. Database Configuration ==========
 
-Parameters.database.host = '';
-Parameters.database.port = '';
+Parameters.database.host = ''; % should be localhost
+Parameters.database.port = ''; % should be 5432
 Parameters.database.dbname = '';
-Parameters.database.username = '';
+Parameters.database.username = ''; % should be postgres
 Parameters.database.password = ''; % should be encrypted
-Parameters.database.schema = '';
+Parameters.database.schema = 'parameters'; % do not change
 
 %% ========== 4. MS1 Processing Settings ==========
 Parameters.MS1.min_S_N_maximum = 5;

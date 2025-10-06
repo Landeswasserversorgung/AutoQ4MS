@@ -5,20 +5,26 @@
 % 3. Generating a Windows batch file to start the application
 % 4. Creating a desktop shortcut for launching the app
 %% 
-setup()
-
-%% Setup
 thisFile = mfilename('fullpath');
 [thisPath, ~, ~] = fileparts(thisFile);
 cd(thisPath);
+setup()
 
+%% Setup
 disp('Installation is executed');
 
 %% Load Parameters
 % Load application settings from .mat file
 Parameters_struct
-setup()
-load('data\Import\methods\Parameters.mat');  % Structure with parameters to run the application
+
+thisFile = mfilename('fullpath');
+[thisPath, ~, ~] = fileparts(thisFile);
+cd(thisPath);
+load('..\data\Import\methods\Parameters.mat');  % Structure with parameters to run the application
+
+
+
+
 
 %% Optional: Edit Parameters via GUI
 editParameters = editParametersGUI(Parameters);
@@ -29,6 +35,27 @@ end
 % Save potentially updated parameters
 save(fullfile(Parameters.path.program, 'data', 'Import', 'methods', 'Parameters.mat'), 'Parameters');
 disp('Parameters were saved.');
+
+%% create folder
+folderPath = fullfile(Parameters.path.program, 'src', 'database', 'failed');
+if ~exist(folderPath, 'dir')
+    mkdir(folderPath);
+end
+
+folderPath = fullfile(Parameters.path.program, 'src', 'mail', 'images');
+if ~exist(folderPath, 'dir')
+    mkdir(folderPath);
+end
+
+folderPath = fullfile(Parameters.path.program, 'data', 'import', 'mslib');
+if ~exist(folderPath, 'dir')
+    mkdir(folderPath);
+end
+
+folderPath = fullfile(Parameters.path.program, 'bat');
+if ~exist(folderPath, 'dir')
+    mkdir(folderPath);
+end
 
 %% Step 1: Create Table Structure in the Database
 disp("Create the data tables in the database");
@@ -54,15 +81,15 @@ fclose(fileID);
 runsqlfile(filepath, Parameters);
 
 %% Step 2: Generate Batch File to Launch Application
-batFile = fullfile(Parameters.path.program, 'bat', 'start_MTSlite_admin.bat');
+batFile = fullfile(Parameters.path.program, 'bat', 'start_AutoQ4MS_admin.bat');
 fid = fopen(batFile, 'w');
 if fid == -1
     error('Could not create BAT file: %s', batFile);
 end
 
 % Prepare full path to MATLAB project file with escaped backslashes
-projectPath = strrep(fullfile(string(Parameters.path.program), 'MTSlite.prj'), '\', '\\');
-matlabCmd = sprintf("openProject('%s'); MTSlite", projectPath);
+projectPath = strrep(fullfile(string(Parameters.path.program), 'src'), '\', '\\');
+matlabCmd = sprintf("cd('%s'); AutoQ4MS", projectPath);
 
 % Write content of the batch file
 fprintf(fid, '@echo off\n');
@@ -81,7 +108,7 @@ disp(['BAT file created: ', batFile]);
 
 %% Step 3: Create Desktop Shortcut via Batch + PowerShell
 desktop = Parameters.path.desktop;
-shortcutName = 'MTSlite.lnk';
+shortcutName = 'AutoQ4MS.lnk';
 shortcutBat = fullfile(Parameters.path.program, 'bat', 'create_shortcut.bat');
 
 fid = fopen(shortcutBat, 'w');

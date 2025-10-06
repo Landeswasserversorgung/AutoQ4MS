@@ -8,6 +8,7 @@ function sampleprocessing(FilePath, Parameters)
 % If either argument is missing, default values are used.
 
     %% 0. Setup: Set current working directory
+    setup()
     thisFile = mfilename('fullpath');
     [thisPath, ~, ~] = fileparts(thisFile);
     cd(thisPath);
