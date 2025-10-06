@@ -52,7 +52,7 @@ if ~exist(folderPath, 'dir')
     mkdir(folderPath);
 end
 
-folderPath = fullfile(Parameters.path.program, 'bat');
+folderPath = fullfile(Parameters.path.program, 'logs');
 if ~exist(folderPath, 'dir')
     mkdir(folderPath);
 end

@@ -51,4 +51,6 @@ resources/
 !template.bat
 
 
-src/structs/Parameters_struct.m
+# In .gitignore
+src/struct/Parameters_struct.m
+

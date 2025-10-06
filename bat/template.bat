@@ -2,7 +2,7 @@
 
 cd /d "%PROJECT_PATH%"
 
-echo [MTSlite] Processing is executed...
+echo [AutoQ4MS] Processing is executed...
 
 REM Methode extrahieren (Dateiname ohne Pfad und Endung)
 for %%f in ("%METHOD_PATH%") do set "METHOD_NAME=%%~nf"
@@ -16,7 +16,7 @@ set LOG_PATH=%PROJECT_PATH%\logs\%METHOD_NAME%_%TS%.log
 REM Vorherige Log-Datei löschen (optional)
 if exist "%LOG_PATH%" del "%LOG_PATH%"
 
-"%MATLAB_EXE%" -wait -r "try, openProject(pwd); processing('%METHOD_PATH%'); disp('[MTSlite] processing finished successfully.'); exit(0); catch e, fid = fopen('%LOG_PATH%', 'w'); msg = getReport(e, 'extended', 'hyperlinks', 'off'); fprintf(fid, 'FAIL\n%%s\n', msg); fclose(fid); exit(1); end"
+"%MATLAB_EXE%" -wait -r "try,  processing('%METHOD_PATH%'); disp('[AutoQ4MS] processing finished successfully.'); exit(0); catch e, fid = fopen('%LOG_PATH%', 'w'); msg = getReport(e, 'extended', 'hyperlinks', 'off'); fprintf(fid, 'FAIL\n%%s\n', msg); fclose(fid); exit(1); end"
 
 REM Fehler prüfen anhand Log
 findstr /C:"FAIL" "%LOG_PATH%" >nul

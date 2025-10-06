@@ -53,6 +53,6 @@ end
 delete(batch_file);
 end
 
-pgsqluser
+
 
 

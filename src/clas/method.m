@@ -233,12 +233,13 @@ classdef method
             % Pfade zum Template und Output
             templateFile = fullfile(projectPath, 'bat', 'template.bat');
             outputFile   = fullfile(projectPath, 'bat', [obj.Name, '_run_processing.bat']);
-            
+
+            processingPath  = fullfile(projectPath, 'src');
             % Template einlesen
             templateText = fileread(templateFile);
             
             % Platzhalter ersetzen
-            templateText = strrep(templateText, '%PROJECT_PATH%', projectPath);
+            templateText = strrep(templateText, '%PROJECT_PATH%', processingPath);
             templateText = strrep(templateText, '%MATLAB_EXE%', matlabExe);
             templateText = strrep(templateText, '%METHOD_PATH%', matFilePath);
             
