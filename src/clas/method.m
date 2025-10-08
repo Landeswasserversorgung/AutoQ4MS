@@ -226,28 +226,59 @@ classdef method
             runsqlfile(filepath, obj.Parameters);
         
             %% Step 2: Generate .bat file with error logging
-            projectPath  = obj.Parameters.path.program;
-            matlabExe    = obj.Parameters.path.MATLABexe;
-            matFilePath  = fullfile(obj.Parameters.path.program,'data','import', 'methods', [obj.Name, '.mat']);
-            
-            % Pfade zum Template und Output
-            templateFile = fullfile(projectPath, 'bat', 'template.bat');
-            outputFile   = fullfile(projectPath, 'bat', [obj.Name, '_run_processing.bat']);
+            % projectPath  = obj.Parameters.path.program;
+            % matlabExe    = obj.Parameters.path.MATLABexe;
+            % matFilePath  = fullfile(obj.Parameters.path.program,'data','import', 'methods', [obj.Name, '.mat']);
+            % 
+            % % Pfade zum Template und Output
+            % templateFile = fullfile(projectPath, 'bat', 'template.bat');
+            % outputFile   = fullfile(projectPath, 'bat', [obj.Name, '_run_processing.bat']);
+            % 
+            % processingPath  = fullfile(projectPath, 'src');
+            % % Template einlesen
+            % templateText = fileread(templateFile);
+            % 
+            % % Platzhalter ersetzen
+            % templateText = strrep(templateText, '%PROJECT_PATH%', processingPath);
+            % templateText = strrep(templateText, '%MATLAB_EXE%', matlabExe);
+            % templateText = strrep(templateText, '%METHOD_PATH%', matFilePath);
+            % 
+            % % .bat-Datei schreiben
+            % fid = fopen(outputFile, 'wt');
+            % fwrite(fid, templateText);
+            % fclose(fid);
 
-            processingPath  = fullfile(projectPath, 'src');
-            % Template einlesen
-            templateText = fileread(templateFile);
+            %% Step 2: Generate .cmd (one-liner) without template
+
+            projectPath   = obj.Parameters.path.program;                          % ...\AutoQ_paper
+            srcDir        = fullfile(projectPath,'src');
+            matFile       = fullfile(projectPath,'data','import','methods',[obj.Name '.mat']);
+            matlabExe     = obj.Parameters.path.MATLABexe;                         % ...\MATLAB\R2024a\bin\matlab.exe
+            batDir        = fullfile(projectPath,'bat');
+            outFile       = fullfile(batDir,[obj.Name '_run_processing.bat']);
             
-            % Platzhalter ersetzen
-            templateText = strrep(templateText, '%PROJECT_PATH%', processingPath);
-            templateText = strrep(templateText, '%MATLAB_EXE%', matlabExe);
-            templateText = strrep(templateText, '%METHOD_PATH%', matFilePath);
+            if ~exist(batDir,'dir'), mkdir(batDir); end
             
-            % .bat-Datei schreiben
-            fid = fopen(outputFile, 'wt');
-            fwrite(fid, templateText);
+            % --- sanitize/escaping ---
+            matlabExe  = strrep(matlabExe,'"','');                                 % keine doppelten "
+            srcDirEsc  = strrep(srcDir,'''','''''');                                % ' -> ''
+            matFileEsc = strrep(matFile,'''','''''');                               % ' -> ''
+            
+            % --- final content (Mehrzeiler, robust) ---
+            bat = sprintf(['@echo off\r\n' ...
+                            'dir "%s" >nul 2>&1 || (echo [AutoQ4MS] MATLAB nicht gefunden. & pause & exit /b 1)\r\n'...
+                           '"%s" -batch "cd(''%s''); run_method(''%s'')"\r\n' ...
+                           'exit\r\n'], ...
+                           matlabExe, matlabExe,srcDirEsc, matFileEsc);
+            
+            % schreiben
+            fid = fopen(outFile,'wt');  assert(fid>0, 'Cannot open %s', outFile);
+            fwrite(fid, bat);
             fclose(fid);
-        
+            
+            fprintf('Wrote launcher: %s\n', outFile);
+
+
             %% Step 3: Configure Task Scheduler
             obj.taskmanagerupdate();
         
