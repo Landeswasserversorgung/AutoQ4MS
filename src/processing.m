@@ -11,7 +11,6 @@ function processing(methodPath)
 
     clc;
     clearvars -except methodPath;
-    %setup()
 
     %% Prevent multiple instances of the same method
     try

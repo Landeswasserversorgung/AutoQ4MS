@@ -89,7 +89,7 @@ end
 
 % Prepare full path to MATLAB project file with escaped backslashes
 projectPath = strrep(fullfile(string(Parameters.path.program), 'src'), '\', '\\');
-matlabCmd = sprintf("cd('%s'); AutoQ4MS", projectPath);
+matlabCmd = sprintf("cd('%s');setup(); AutoQ4MS", projectPath);
 
 % Write content of the batch file
 fprintf(fid, '@echo off\n');
@@ -100,6 +100,7 @@ fprintf(fid, '    exit /b\n');
 fprintf(fid, ')\n\n');
 
 fprintf(fid, ':: Start MATLAB in nodesktop mode and launch app\n');
+%fprintf(fid, '"%s" -batch "%s"\n',Parameters.path.MATLABexe ,matlabCmd);
 fprintf(fid, 'start "" matlab -nosplash -nodesktop -r "%s"\n', matlabCmd);
 fprintf(fid, 'exit\n');
 fclose(fid);
