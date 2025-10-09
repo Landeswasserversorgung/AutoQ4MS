@@ -39,6 +39,8 @@ Thumbs.db
 resources/
 
 *.sql
+*.png
+*.csv
 *.log
 !PivotQueryTemplate.sql
 *.xlsx

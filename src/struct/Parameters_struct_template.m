@@ -79,7 +79,7 @@ Parameters.MS2.binOffset = 0.2;
 Parameters.MS2.threshold = 10;
 Parameters.MS2.removePrecursor = true; % During generation and Check 
 Parameters.MS2.From = 1;  % 1 = from MS data
-Parameters.MS2.ReferencePath = ""; %Path for MS2 Library Reference Samples (Standards), must be mzXML
+Parameters.path.MS2_ReferencePath = ""; %Path for MS2 Library Reference Samples (Standards)
 
 %% ========== 6. Chromatography Settings ==========
 Parameters.chroma.RTToleranceInSec = 9;

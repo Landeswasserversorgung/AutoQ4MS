@@ -1,7 +1,7 @@
 
 
-methodPath = fullfile(Parameters.path.program,'data','Import', 'methods', 'TEST.mat'); 
-load
+methodPath = fullfile(Parameters.path.program,'data','Import', 'methods', 'std.mat'); 
+
 
 loaded = load(methodPath, 'Parameters');
 if ~isfield(loaded, 'Parameters')
