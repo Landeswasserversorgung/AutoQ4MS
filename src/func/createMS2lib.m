@@ -118,7 +118,7 @@ for k = 1:nFiles
             end
         end
     end
-
+f
     % Optional progress text for loading
     waitbar((k-0.5)/nFiles, hWait, sprintf('(%d/%d) Loading mzXML', k, nFiles));
 
@@ -126,8 +126,6 @@ for k = 1:nFiles
     [ms1_data, ms2_data] = loadmzxml(mzXMLFilePath);
 
     % Stash loaded variables in base workspace with unique names (your original behavior)
-    sample         = strtok(base, '.');
-    sample         = matlab.lang.makeValidName(sample);
     uniqueName_ms1 = char("ms1_" + sample);
     uniqueName_ms2 = char("ms2_" + sample);
     assignin('base', uniqueName_ms1, ms1_data);
@@ -135,7 +133,7 @@ for k = 1:nFiles
     fprintf('Processed %s and saved as %s and %s\n', base, uniqueName_ms1, uniqueName_ms2);
 
     %% Match MS2 spectra to reference rows
-    currentREF = char("Json_" + sample + "_referenceTable");
+    currentREF = char("Json_" + sprintf("Standard_%d", k) + "_referenceTable");
 
     % Use a sample-specific reference table if it already exists in base
     isVarInWorkspace = evalin('base', sprintf('exist(''%s'', ''var'')', currentREF));
