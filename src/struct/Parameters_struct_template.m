@@ -1,7 +1,9 @@
 %% MTSlite - Parameter Initialization Script (new)
 % Configuration script for initializing the Parameters struct used by MTSlite.
 
-clear; clc;
+clearvars -except installationfilepath;
+clc;
+
 
 %% Set working directory to script location
 thisFile = mfilename('fullpath');

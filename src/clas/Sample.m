@@ -298,7 +298,7 @@ classdef Sample
             startStr = datestr(startDate, 'yyyy-mm-dd HH:MM:SS');
 
             % Prepare plot figure
-            fig = figure('Position', [100, 100, 1300, 800]);
+            fig = figure('Visible','off', 'Position', [100, 100, 1300, 800]);
             sgtitle('Device Control');
             markers = repmat({'o-', '*-', 'x-', 's-', 'd-', '^-', 'v-', '>-', '<-'}, 20, 1);
             warningText = "Sample failed IS Check";
@@ -315,7 +315,6 @@ classdef Sample
             normRT{:,:} = NaN;
             for col = RTTable.Properties.VariableNames(2:end)
                 RTTable.(col{1}) = (RTTable.(col{1}) - median(RTTable.(col{1}), 'omitnan')) * 60;
-
                 medianRT.(col{1}) = median(RTTable_abs.(col{1}), 'omitnan');
 
             end
@@ -427,9 +426,11 @@ classdef Sample
             [normIntTable, ~] = SQLRequest(startStr, nowStr, obj.MSMode, 'normIntensities', 'ISValue', '', '', Parameters);
             normIntTable = filterIS(normIntTable, obj.ISdic, ISKey);
             plotDeviceMetric(normIntTable, Parameters.DeviceControl.intensity_lowerLimit, Parameters.DeviceControl.intensity_upperLimit, 'Relative Intensity', 'Internal Standard Intensity', markers, true);
-
+            
             % Save figure and convert to Base64
-            imgPath = fullfile(Parameters.path.program, 'src', 'mail', 'images', 'DeviceControl.png');
+            imgPath = fullfile(Parameters.path.program, 'src', 'mail', 'images', ...
+                    sprintf('DeviceControl_%s.png', datestr(now, 'yyyymmdd_HHMMSS')));
+            
             exportgraphics(fig, imgPath, 'Resolution', 600);
             imgData = fread(fopen(imgPath, 'rb'), '*uint8');
             base64 = matlab.net.base64encode(imgData);
