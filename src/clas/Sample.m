@@ -439,7 +439,9 @@ classdef Sample
             % Final ISCheck status
             obj.ISCheck = ISCheckfailed(SampleISCheck, warningText, imgTag, obj, Parameters);
             close(fig);
-            
+            if exist(imgPath, 'file')
+                delete(imgPath);
+            end
         end
 
     end
