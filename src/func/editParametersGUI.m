@@ -1,6 +1,20 @@
 function updatedParameters = editParametersGUI(inputStruct, titleName)
-% editStructGUI - GUI to edit a nested struct
-% updatedStruct = editStructGUI(inputStruct, titleName)
+%EDITPARAMETERSGUI  GUI editor for a (possibly nested) parameters struct.
+%   updatedParameters = editParametersGUI(inputStruct, titleName)
+%   Opens a simple, form-like GUI to edit fields of a given struct. Supports:
+%     - numeric scalars and numeric vectors
+%     - logical values via toggle button
+%     - char/string values (with optional "Browse..." button for paths)
+%     - nested structs via "Edit..." sub-dialogs
+%
+%   Inputs:
+%     inputStruct - Struct with parameters to display and edit
+%     titleName   - (optional) Window title; if it contains 'path' a "Browse..."
+%                   button is shown for string/char fields (file/folder selection)
+%
+%   Output:
+%     updatedParameters - Edited struct, or [] if cancelled
+%
 
     if nargin < 2
         titleName = 'Edit Struct';
@@ -10,50 +24,75 @@ function updatedParameters = editParametersGUI(inputStruct, titleName)
     fields = fieldnames(inputStruct);
     n = numel(fields);
 
-    guiWidth = 700;
+    % Basic layout metrics
+    guiWidth  = 700;
     rowHeight = 40;
     guiHeight = 100 + n * rowHeight;
 
+    % Create figure (modal-like behavior via uiwait/uitable)
     hFig = figure('Name', titleName, 'MenuBar', 'none', 'NumberTitle', 'off', 'Resize', 'off', ...
         'Color', [0.95 0.95 0.95], 'DockControls', 'off', 'WindowStyle', 'normal', ...
         'Position', centerFig(guiWidth, guiHeight));
 
+    % Build controls row by row
     y = guiHeight - 60;
     for i = 1:n
         field = fields{i};
+
+        % Skip the 'tables' field entirely
         if strcmp(field, 'tables')
             continue;
         end
+
         val = inputStruct.(field);
 
+        % Field label
         uicontrol(hFig, 'Style', 'text', 'String', field, 'Position', [20, y, 200, 25], ...
             'FontSize', 10, 'BackgroundColor', [0.95 0.95 0.95], 'HorizontalAlignment', 'left');
 
+        % Field editor
         if isstruct(val)
-            uicontrol(hFig, 'Style', 'pushbutton', 'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], 'String', 'Edit...', 'Position', [240, y, 100, 25], ...
+            % Nested struct → open sub-dialog
+            uicontrol(hFig, 'Style', 'pushbutton', 'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], ...
+                'String', 'Edit...', 'Position', [240, y, 100, 25], ...
                 'Callback', @(~,~) editNested(field));
+
         elseif isnumeric(val) && isvector(val) && numel(val) > 1
+            % Numeric vector → render one edit per element
             for j = 1:numel(val)
-                uicontrol(hFig, 'Style', 'edit', 'FontSize', 10, 'BackgroundColor', [0.98 0.98 0.98], 'String', num2str(val(j)), 'Position', [240 + (j-1)*80, y, 70, 25], ...
+                uicontrol(hFig, 'Style', 'edit', 'FontSize', 10, 'BackgroundColor', [0.98 0.98 0.98], ...
+                    'String', num2str(val(j)), 'Position', [240 + (j-1)*80, y, 70, 25], ...
                     'Callback', @(src,~) updateArrayElement(field, j, src));
             end
+
         elseif islogical(val)
-            uicontrol(hFig, 'Style', 'togglebutton', 'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], 'String', logicalToString(val), 'Value', val, 'Position', [240, y, 100, 25], ...
+            % Logical → toggle button with text true/false
+            uicontrol(hFig, 'Style', 'togglebutton', 'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], ...
+                'String', logicalToString(val), 'Value', val, 'Position', [240, y, 100, 25], ...
                 'Callback', @(src,~) toggleLogical(field, src));
+
         elseif ischar(val) || isstring(val)
+            % Char/string → edit box (+ optional Browse)
             editField = uicontrol(hFig, 'Style', 'edit', 'String', char(val), 'Position', [240, y, 340, 25], ...
-                'FontSize', 10, 'BackgroundColor', [0.98 0.98 0.98], 'Callback', @(src,~) updateField(field, src));
+                'FontSize', 10, 'BackgroundColor', [0.98 0.98 0.98], 'Callback', @(src,~) updateField(field, src)); %#ok<NASGU>
+
             if contains(titleName, 'path')
-                if strcmp(field,'MATLABexe')||strcmp(field,'proteoWizard')||strcmp(field,'psqlExe')||strcmp(field,'ISExcel')||strcmp(field,'CompExcel')
+                % Heuristics: for known file fields, open a file chooser
+                if strcmp(field,'MATLABexe') || strcmp(field,'proteoWizard') || strcmp(field,'psqlExe') || ...
+                   strcmp(field,'ISExcel')   || strcmp(field,'CompExcel')
                     uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Browse...', 'Position', [590, y, 80, 25], ...
                         'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], ...
-                           'Callback', @(~,~) browsePath(field, 'file'));
+                        'Callback', @(~,~) browsePath(field, 'file'));
                 else
+                    % Fallback: folder chooser
                     uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Browse...', 'Position', [590, y, 80, 25], ...
-                        'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], 'Callback', @(~,~) browsePath(field));
+                        'FontSize', 10, 'BackgroundColor', [0.94 0.94 0.94], ...
+                        'Callback', @(~,~) browsePath(field));
                 end
             end
+
         elseif isnumeric(val)
+            % Numeric scalar
             uicontrol(hFig, 'Style', 'edit', 'String', convertToString(val), 'Position', [240, y, 100, 25], ...
                 'FontSize', 10, 'BackgroundColor', [0.98 0.98 0.98], 'Callback', @(src,~) updateField(field, src));
         end
@@ -61,24 +100,31 @@ function updatedParameters = editParametersGUI(inputStruct, titleName)
         y = y - rowHeight;
     end
 
-    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Save', 'Position', [guiWidth/2 - 110, 20, 100, 30], 'Callback', @saveCallback);
-    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', [guiWidth/2 + 10, 20, 100, 30], 'Callback', @cancelCallback);
+    % Save/Cancel buttons
+    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Save',   'Position', [guiWidth/2 - 110, 20, 100, 30], 'Callback', @saveCallback);
+    uicontrol(hFig, 'Style', 'pushbutton', 'String', 'Cancel', 'Position', [guiWidth/2 + 10,  20, 100, 30], 'Callback', @cancelCallback);
 
+    % Modal wait; figure is closed in callbacks
     uiwait(hFig);
 
+    % Return edited parameters (or [] if cancelled)
     updatedParameters = updatedStruct;
 
+    % ------- Nested helpers (capture updatedStruct & inputStruct by closure) -------
+
     function editNested(fieldName)
+        % Open a recursive editor for a sub-struct
         subStruct = updatedStruct.(fieldName);
         edited = editParametersGUI(subStruct, ['Edit: ' fieldName]);
         if ~isempty(edited)
             updatedStruct.(fieldName) = edited;
         end
-        end
+    end
 
     function updateField(fieldName, src)
+        % Update a scalar field with basic validation based on original type
         originalVal = inputStruct.(fieldName);
-        inputStr = src.String;
+        inputStr    = src.String;
 
         if isnumeric(originalVal)
             val = str2double(inputStr);
@@ -94,72 +140,72 @@ function updatedParameters = editParametersGUI(inputStruct, titleName)
 
         updatedStruct.(fieldName) = val;
     end
-function browsePath(fieldName, type)
-    if nargin < 2
-        type = 'folder'; % Default to folder selection if no type is specified
-    end
 
-    current = updatedStruct.(fieldName);
+    function browsePath(fieldName, type)
+        % Browse for a file or a folder and update the corresponding field
+        if nargin < 2
+            type = 'folder'; % default
+        end
 
-    switch type
-        case 'file'
-            % Determine starting path for file selection
-            if isfolder(current)
-                startPath = current;
-            else
-                startPath = fileparts(current);
+        current = updatedStruct.(fieldName);
+
+        switch type
+            case 'file'
+                % Determine starting folder for file dialog
+                if isfolder(current)
+                    startPath = current;
+                else
+                    startPath = fileparts(current);
+                end
+                [file, path] = uigetfile({'*.*', 'All Files'}, 'Select a file', startPath);
+                if isequal(file, 0)
+                    return; % user cancelled
+                end
+                newPath = fullfile(path, file);
+
+            case 'folder'
+                % Folder selection dialog; start at current if valid
+                if isfolder(current)
+                    newPath = uigetdir(current);
+                else
+                    newPath = uigetdir;
+                end
+                if newPath == 0
+                    return; % user cancelled
+                end
+
+            otherwise
+                return; % unsupported type
+        end
+
+        % Update struct value
+        updatedStruct.(fieldName) = newPath;
+
+        % Try to update the first matching edit control showing the old path
+        allEdits = findall(hFig, 'Style', 'edit');
+        for k2 = 1:numel(allEdits)
+            if strcmp(allEdits(k2).String, current)
+                allEdits(k2).String = newPath;
+                break;
             end
-
-            % Open file selection dialog
-            [file, path] = uigetfile({'*.*', 'All Files'}, 'Select a file', startPath);
-            if isequal(file, 0)
-                return; % User cancelled
-            end
-            newPath = fullfile(path, file);
-
-        case 'folder'
-            % Open folder selection dialog with current path if valid
-            if isfolder(current)
-                newPath = uigetdir(current);
-            else
-                newPath = uigetdir;
-            end
-            if newPath == 0
-                return; % User cancelled
-            end
-
-        otherwise
-            return; % Invalid type provided
-    end
-
-    % Update the structure with the new path
-    updatedStruct.(fieldName) = newPath;
-
-    % Update the corresponding edit field in the UI (if it exists)
-    allEdits = findall(hFig, 'Style', 'edit');
-    for k = 1:numel(allEdits)
-        if strcmp(allEdits(k).String, current)
-            allEdits(k).String = newPath;
-            break; % Update only the first matching edit field
         end
     end
-end
 
-
-    
-
-        function saveCallback(~,~)
-        uiresume(gcbf);  % use current figure as fallback
+    function saveCallback(~,~)
+        % Confirm & close
+        uiresume(gcbf);
         delete(gcbf);
     end
 
     function toggleLogical(fieldName, src)
-        val = logical(src.Value);  % use the actual state
+        % Toggle a logical value using the control state
+        val = logical(src.Value);
         src.String = logicalToString(val);
         updatedStruct.(fieldName) = val;
     end
 
     function updateArrayElement(fieldName, index, src)
+        % Update one element of a numeric vector
         val = str2double(src.String);
         if isnan(val)
             warndlg(['Invalid numeric input for array element #' num2str(index)], 'Validation Error');
@@ -170,16 +216,18 @@ end
         updatedStruct.(fieldName) = current;
     end
 
-        
-
     function cancelCallback(~,~)
+        % Cancel editing and return []
         updatedStruct = [];
         uiresume(hFig);
         delete(hFig);
     end
 end
 
+% ------------------ Local utilities ------------------
+
 function pos = centerFig(w, h)
+    % Center a figure of width w and height h on the main screen
     screenSize = get(0, 'ScreenSize');
     x = (screenSize(3) - w) / 2;
     y = (screenSize(4) - h) / 2;
@@ -187,6 +235,7 @@ function pos = centerFig(w, h)
 end
 
 function str = convertToString(val)
+    % Convert numeric/logical/string to displayable char
     if isnumeric(val)
         str = num2str(val);
     elseif islogical(val)
@@ -197,7 +246,10 @@ function str = convertToString(val)
 end
 
 function str = logicalToString(b)
+    % Render logical true/false as 'true'/'false'
     str = 'false';
-    if b, str = 'true'; end
+    if b
+        str = 'true';
+    end
 end
 

@@ -1,18 +1,25 @@
 function sqlCmd = createSimpleSQLUpdateCommand(schemaName, tableName, columnName, value, whereConditions)
-
-% Erstellt einen SQL UPDATE-Befehl mit durchgängig case-sensitiven Namen
+%CREATESIMPLESQLUPDATECOMMAND  Build a case-sensitive SQL UPDATE statement.
+%   Constructs an SQL UPDATE command string using quoted identifiers for
+%   schema, table, and column names to preserve case sensitivity.
 %
-% Inputs:
-%   schemaName       - z. B. 'dbo'
-%   tableName        - z. B. 'ISValue'
-%   columnName       - z. B. 'intensity'
-%   value            - Neuer Wert (numeric, string, char)
-%   whereConditions  - Cell-Array: z. B. {'ID', 1; 'SampleName', 'A1'}
+%   Inputs:
+%     schemaName      - e.g., 'dbo'
+%     tableName       - e.g., 'ISValue'
+%     columnName      - e.g., 'intensity'
+%     value           - New value (numeric, string, or char)
+%     whereConditions - Cell array of key/value pairs:
+%                       e.g., {'ID', 1; 'SampleName', 'A1'}
 %
-% Output:
-%   sqlCmd           - SQL-Update-Statement (String)
+%   Output:
+%     sqlCmd - SQL UPDATE statement as a string
+%
+%   Example:
+%     sqlCmd = createSimpleSQLUpdateCommand('dbo','ISValue','intensity',42, ...
+%               {'ID',1;'SampleName','A1'});
+%
 
-    % Format SET-Wert
+    % Format SET value
     if isnumeric(value)
         valStr = num2str(value);
     elseif ischar(value) || isstring(value)
@@ -23,13 +30,13 @@ function sqlCmd = createSimpleSQLUpdateCommand(schemaName, tableName, columnName
         error('Unsupported value type.');
     end
 
-    % Format WHERE-Bedingungen
+    % Format WHERE conditions
     whereStrs = cell(size(whereConditions, 1), 1);
     for i = 1:size(whereConditions, 1)
         col = whereConditions{i, 1};
         condVal = whereConditions{i, 2};
 
-        colQuoted = sprintf('"%s"', col);  % Immer case-sensitive
+        colQuoted = sprintf('"%s"', col);  % Always case-sensitive
 
         if isnumeric(condVal)
             condStr = sprintf('%s = %g', colQuoted, condVal);
@@ -46,10 +53,11 @@ function sqlCmd = createSimpleSQLUpdateCommand(schemaName, tableName, columnName
 
     whereClause = strjoin(whereStrs, ' AND ');
 
-    % SQL-Zeile mit durchgängig gequoteten Namen
+    % Build the final SQL command with quoted identifiers
     sqlCmd = sprintf('UPDATE "%s"."%s" SET "%s" = %s WHERE %s;', ...
                      schemaName, tableName, columnName, valStr, whereClause);
 end
+
 
 
 

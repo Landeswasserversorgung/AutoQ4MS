@@ -1,19 +1,37 @@
 function CopiedFiles = CopyMatchingNameParts(filePath, destDir, srcDir)
+%COPYMATCHINGNAMEPARTS  Copy files whose names contain a given substring.
+%   Copies all files from a source directory (recursively) whose filenames
+%   contain the same name part as a reference file. Maintains subfolder
+%   structure when copying into the destination directory.
+%
+%   Inputs:
+%     filePath - Full path to the reference file
+%     destDir  - Destination directory where matching files are copied
+%     srcDir   - Root source directory to search within (recursively)
+%
+%   Output:
+%     CopiedFiles - String array of full paths to all copied files
+%
+%   Example:
+%     CopyMatchingNameParts("C:\data\run1\sampleA.raw", ...
+%                           "C:\backup\", ...
+%                           "C:\data\")
+%
 
-    % Ensure char types
+    % Ensure inputs are character vectors
     filePath = char(filePath);
-    destDir = char(destDir);
-    srcDir = char(srcDir);
+    destDir  = char(destDir);
+    srcDir   = char(srcDir);
 
-    % Extract filename (without path)
+    % Extract filename (without extension or path)
     [~, fileName, ~] = fileparts(filePath);
 
-    % Make sure the source directory exists
+    % Validate that source directory exists
     if ~isfolder(srcDir)
         error('Source directory does not exist: %s', srcDir);
     end
 
-    % Make sure destination root exists
+    % Ensure that destination directory exists (create if needed)
     if ~isfolder(destDir)
         mkdir(destDir);
     end
@@ -21,19 +39,19 @@ function CopiedFiles = CopyMatchingNameParts(filePath, destDir, srcDir)
     % Recursively list all files under srcDir
     allFiles = dir(fullfile(srcDir, '**', '*'));
 
-    % Init output
+    % Initialize output container
     CopiedFiles = {};
 
     for i = 1:length(allFiles)
         if allFiles(i).isdir
-            continue; % skip folders
+            continue; % Skip folders
         end
 
-        % Check if file name contains the target name
+        % Check if the filename contains the reference name part
         if contains(allFiles(i).name, fileName)
             fullSrcPath = fullfile(allFiles(i).folder, allFiles(i).name);
 
-            % Build relative path from srcDir
+            % Build relative path (preserve subdirectory structure)
             relativePath = erase(fullSrcPath, srcDir);
             if startsWith(relativePath, filesep)
                 relativePath = relativePath(2:end);
@@ -48,16 +66,18 @@ function CopiedFiles = CopyMatchingNameParts(filePath, destDir, srcDir)
                 mkdir(destFolder);
             end
 
-            % Copy the file
+            % Copy the file and log to console
             copyfile(fullSrcPath, fullDestPath);
             disp(['Copied: ', fullDestPath]);
 
-            % Add to list
-            CopiedFiles{end+1} = fullDestPath;
+            % Add path to output list
+            CopiedFiles{end+1} = fullDestPath; %#ok<AGROW>
         end
     end
 
-    % Convert to string array
+    % Convert list to string array
     CopiedFiles = string(CopiedFiles);
+
+
 end
 

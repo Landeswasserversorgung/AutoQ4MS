@@ -1,23 +1,24 @@
 function exe = find_msconvert()
-% FIND_MSCONVERT  Locate the path to ProteoWizard's msconvert.exe on Windows.
+%FIND_MSCONVERT  Locate the path to ProteoWizard's msconvert.exe on Windows.
 %
-% This function searches for msconvert.exe using several strategies:
-%   A) Checks if it's available in the system PATH (via "where" command)
-%   B) Looks in common installation directories under "Program Files"
-%   C) Searches the user's local AppData (for non-admin installs)
-%   D) As a last resort, performs a recursive search under Program Files
+%   This function attempts to locate msconvert.exe by:
+%     A) Checking if it is available in the system PATH ("where" command)
+%     B) Searching common installation directories under Program Files
+%     C) Looking for user-local installs under AppData
+%     D) As a fallback, recursively scanning Program Files folders
 %
-% Returns:
-%   exe - full path to msconvert.exe (string)
-%         empty string "" if not found
+%   Returns:
+%     exe (string) - Full path to msconvert.exe
+%                    Empty string "" if not found
 %
-% Example:
-%   exe = find_msconvert();
-%   if exe == ""
-%       warning('MSConvert not found on this system.');
-%   else
-%       fprintf('MSConvert found: %s\n', exe);
-%   end
+%   Example:
+%     exe = find_msconvert();
+%     if exe == ""
+%         warning('MSConvert not found on this system.');
+%     else
+%         fprintf('MSConvert found: %s\n', exe);
+%     end
+%
 
     exe = "";
 
@@ -32,7 +33,7 @@ function exe = find_msconvert()
         end
     end
 
-    %% B) Check common installation directories (Program Files)
+    %% B) Common installation directories (Program Files)
     candidates = [
         "C:\Program Files\ProteoWizard\ProteoWizard 64-bit\msconvert.exe"
         "C:\Program Files\ProteoWizard\msconvert.exe"
@@ -47,12 +48,12 @@ function exe = find_msconvert()
         end
     end
 
-    %% C) Check user-specific installation (non-admin setup)
+    %% C) User-specific installation (non-admin setup)
     localAppData = getenv('LOCALAPPDATA'); % e.g. C:\Users\<User>\AppData\Local
     if ~isempty(localAppData)
         d = dir(fullfile(localAppData, "Programs", "ProteoWizard", "**", "msconvert.exe"));
         if ~isempty(d)
-            % Pick the most recently modified one
+            % Choose most recently modified file
             [~, idx] = max([d.datenum]);
             exe = fullfile(d(idx).folder, d(idx).name);
             return;
@@ -72,3 +73,4 @@ function exe = find_msconvert()
         end
     end
 end
+

@@ -1,16 +1,30 @@
 function count = CountsqlFiles(folderPath)
-    % Ensure the input is a char array
+%COUNTSQLFILES  Count the number of .sql files in a folder (non-recursive).
+%   Verifies that the specified folder exists and counts all files with
+%   the ".sql" extension located directly within it (no subfolders).
+%
+%   Input:
+%     folderPath - Path to the folder to scan (char or string)
+%
+%   Output:
+%     count - Number of .sql files found in the folder
+%
+%   Example:
+%     nSQL = CountsqlFiles("C:\projects\database\scripts");
+%
+
+    % Ensure the input is a character vector
     folderPath = char(folderPath);
 
-    % Check if the folder exists
+    % Validate that the folder exists
     if ~isfolder(folderPath)
         error('Folder does not exist: %s', folderPath);
     end
 
-    % Search for all .txt files in the folder (non-recursive)
+    % Find all .sql files in the given folder (non-recursive)
     sqlFiles = dir(fullfile(folderPath, '*.sql'));
 
-    % Return the number of found files
+    % Return the number of found .sql files
     count = numel(sqlFiles);
 end
 

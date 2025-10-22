@@ -1,10 +1,13 @@
 function msconvPath = ensure_msconvert_interactive(msiUrl)
 % ENSURE_MSCONVERT_INTERACTIVE
 % User-friendly checker/installer for ProteoWizard MSConvert on Windows.
-% - If msconvert.exe exists -> returns its full path.
-% - Else asks user: install now?
-%   * Yes  -> download official MSI, launch GUI installer, re-check afterwards.
-%   * No   -> ask user to manually browse to msconvert.exe.
+%
+% Behavior:
+%   - If msconvert.exe exists -> returns its full path and prepends its folder
+%     to the current MATLAB session PATH.
+%   - Else asks user: install now?
+%       * Yes  -> download official MSI, launch GUI installer, re-check afterwards.
+%       * No   -> ask user to manually browse to msconvert.exe.
 %
 % Return:
 %   msconvPath (string): full path to msconvert.exe, or "" if not set/found.
@@ -12,18 +15,19 @@ function msconvPath = ensure_msconvert_interactive(msiUrl)
 % Usage:
 %   url = "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3698364/pwiz-setup-3.0.25286.0edf8b7-x86_64.msi";
 %   msconvPath = ensure_msconvert_interactive(url);
+%
 
     if nargin < 1 || strlength(string(msiUrl)) == 0
-        % Fallback: always point to your preferred "latest" or a stable mirror
+        % Fallback to a known stable MSI URL (adjust to your preferred source)
         msiUrl = "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3698364/pwiz-setup-3.0.25286.0edf8b7-x86_64.msi";
     end
 
     fprintf('\n--- Checking MSConvert ---\n');
 
-    % 1) Already there?
+    % 1) Already installed?
     msconvPath = find_msconvert();
     if msconvPath ~= ""
-        fprintf('✅ MSConvert found: %s\n', msconvPath);
+        fprintf('MSConvert found: %s\n', msconvPath);
         addDirToSessionPath(fileparts(msconvPath));
         return
     end
@@ -58,7 +62,11 @@ function msconvPath = ensure_msconvert_interactive(msiUrl)
                 fprintf('Launching installer (GUI)...\n');
                 system(sprintf('start "" "%s"', msiFile));   % starts the MSI GUI
             catch
-                try, winopen(msiFile); catch, end
+                try
+                    winopen(msiFile);
+                catch
+                    web(msiUrl, '-browser');
+                end
             end
         end
 
@@ -72,7 +80,7 @@ function msconvPath = ensure_msconvert_interactive(msiUrl)
 
         msconvPath = find_msconvert();
         if msconvPath ~= ""
-            fprintf('✅ MSConvert found: %s\n', msconvPath);
+            fprintf('MSConvert found after installation: %s\n', msconvPath);
             addDirToSessionPath(fileparts(msconvPath));
             return
         else
@@ -84,7 +92,7 @@ function msconvPath = ensure_msconvert_interactive(msiUrl)
             msconvPath = browse_for_msconvert();
             if msconvPath ~= ""
                 addDirToSessionPath(fileparts(msconvPath));
-                fprintf('✅ MSConvert set: %s\n', msconvPath);
+                fprintf('MSConvert set manually: %s\n', msconvPath);
             else
                 warning('MSConvert could not be set.');
             end
@@ -100,7 +108,7 @@ function msconvPath = ensure_msconvert_interactive(msiUrl)
         msconvPath = browse_for_msconvert();
         if msconvPath ~= ""
             addDirToSessionPath(fileparts(msconvPath));
-            fprintf('✅ MSConvert set: %s\n', msconvPath);
+            fprintf('MSConvert set manually: %s\n', msconvPath);
         else
             warning('MSConvert could not be set.');
         end
@@ -110,13 +118,13 @@ end
 
 %% ----------------- Helpers -----------------
 function addDirToSessionPath(dirPath)
-% Safe PATH update for the current MATLAB session (handles string/char).
+% Safely prepend a folder to the PATH for the current MATLAB session.
     newPath = string(dirPath) + ";" + string(getenv("PATH"));
     setenv("PATH", newPath);
 end
 
 function p = browse_for_msconvert()
-% Lets the user pick msconvert.exe and validates the selection.
+% Prompt the user to select msconvert.exe and validate the selection.
     [f,fp] = uigetfile({'msconvert.exe','msconvert.exe'}, 'Please select msconvert.exe');
     if isequal(f,0)
         p = "";

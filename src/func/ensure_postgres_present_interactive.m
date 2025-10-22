@@ -1,7 +1,7 @@
 function psql = ensure_postgres_present_interactive()
 % ENSURE_POSTGRES_PRESENT_INTERACTIVE
 % Checks if PostgreSQL (psql.exe) is available on the system.
-% - If found: returns the full path and adds it to the PATH for the current MATLAB session.
+% - If found: returns the full path and adds its folder to the PATH for the current MATLAB session.
 % - If not found: presents a dialog with options:
 %     [Download & Open]  -> Downloads the official 17.6 installer and launches it (GUI),
 %                           then re-checks after user confirmation.
@@ -10,13 +10,14 @@ function psql = ensure_postgres_present_interactive()
 %
 % Return:
 %   psql (string): full path to psql.exe or "" if not found or cancelled.
+%
 
     fprintf('\n--- Checking for PostgreSQL (psql) ---\n');
 
     % 1) Already installed?
     psql = find_psql();
     if psql ~= ""
-        fprintf('✅ PostgreSQL detected: %s\n', psql);
+        fprintf('PostgreSQL detected: %s\n', psql);
         addDirToSessionPath(fileparts(psql));
         return
     end
@@ -40,7 +41,7 @@ function psql = ensure_postgres_present_interactive()
             psql = browse_for_psql();
             if psql ~= ""
                 addDirToSessionPath(fileparts(psql));
-                fprintf('✅ PostgreSQL set: %s\n', psql);
+                fprintf('PostgreSQL set: %s\n', psql);
             else
                 warning('No file selected. PostgreSQL not set.');
             end
@@ -97,7 +98,7 @@ function psql = do_download_and_open_installer_then_recheck()
     p = find_psql();
     if p ~= ""
         addDirToSessionPath(fileparts(p));
-        fprintf('✅ PostgreSQL detected after installation: %s\n', p);
+        fprintf('PostgreSQL detected after installation: %s\n', p);
         psql = p;
         return
     end
@@ -109,7 +110,7 @@ function psql = do_download_and_open_installer_then_recheck()
     p = browse_for_psql();
     if p ~= ""
         addDirToSessionPath(fileparts(p));
-        fprintf('✅ PostgreSQL set manually: %s\n', p);
+        fprintf('PostgreSQL set manually: %s\n', p);
         psql = p;
     else
         warning('PostgreSQL could not be set.');
