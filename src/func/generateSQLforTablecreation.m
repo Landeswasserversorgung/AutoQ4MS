@@ -1,46 +1,68 @@
-function [SQLCommand] = generateSQLforTablecreation(tableMeta, tableName,schemaName)
-%% This Function generates for a table in the format see below a SQL Command to create the Table in postgeSQL.
-% Linus Straehle 2024-05-16
+function SQLCommand = generateSQLforTablecreation(tableMeta, tableName, schemaName)
+%GENERATESQLFORTABLECREATION  Generate a SQL CREATE TABLE statement for PostgreSQL.
+%   SQLCommand = generateSQLforTablecreation(tableMeta, tableName, schemaName)
 %
-% Names = {'SampleID', 'polarity', 'type', 'datetime', 'batch', 'ISCheck', 'Donau outflow', 'concentrationLevel_ngL'}';
-% DataTypes = {'VARCHAR', 'CHAR', 'VARCHAR', 'timestamp without time zone', 'VARCHAR', 'BOOLEAN', 'FLOAT', 'FLOAT'}';
-% Lengths = {[], 1, 10, [], [], [], [], []}';  % [] means no lenth 
-% Scales = {[], [], [], [], [], [], [], []}';  % [] means no scale
-% NotNull = {true, true, true, true, false, false, false, false}';
-% PrimaryKey = {true, false, false, false, false, false, false, false}';
+%   Builds a PostgreSQL-compatible CREATE TABLE statement based on metadata
+%   provided in a MATLAB table.
 %
-% tableMeta = table(Names, DataTypes, Lengths, Scales, NotNull, PrimaryKey);
+%   Expected tableMeta columns:
+%     Names       - Column names (cell array of char/string)
+%     DataTypes   - SQL data types (e.g. 'VARCHAR', 'FLOAT', 'BOOLEAN', ...)
+%     Lengths     - Optional length specifier ([], or numeric)
+%     Scales      - Optional scale specifier ([], or numeric)
+%     NotNull     - Logical flag indicating NOT NULL constraint
+%     PrimaryKey - Logical flag indicating PRIMARY KEY
+%
+%   Inputs:
+%     tableMeta  - Table containing column metadata (see example below)
+%     tableName  - Name of the table to be created
+%     schemaName - PostgreSQL schema name
+%
+%   Output:
+%     SQLCommand - SQL CREATE TABLE command as char
+%
+%   Example:
+%     SQLCommand = generateSQLforTablecreation(tableMeta, 'ISValue', 'dbo');
+%
 
-    SQLCommand = sprintf('CREATE TABLE IF NOT EXISTS "%s"."%s" (',schemaName, tableName);
-    
+    % Initialize CREATE TABLE statement
+    SQLCommand = sprintf('CREATE TABLE IF NOT EXISTS "%s"."%s" (', schemaName, tableName);
+
+    % Iterate over all column definitions
     for i = 1:height(tableMeta)
         columnDef = sprintf('"%s" %s', tableMeta.Names{i}, tableMeta.DataTypes{i});
-        
+
+        % Optional length specification
         if ~isempty(tableMeta.Lengths{i})
             columnDef = sprintf('%s(%d)', columnDef, tableMeta.Lengths{i});
         end
-        
+
+        % Optional scale specification
         if ~isempty(tableMeta.Scales{i})
             columnDef = sprintf('%s(%d)', columnDef, tableMeta.Scales{i});
         end
-        
+
+        % NOT NULL constraint
         if tableMeta.NotNull{i}
             columnDef = sprintf('%s NOT NULL', columnDef);
         end
-        
+
+        % PRIMARY KEY constraint
         if tableMeta.PrimaryKey{i}
             columnDef = sprintf('%s PRIMARY KEY', columnDef);
         end
-        
+
+        % Add comma except for last column
         if i < height(tableMeta)
             columnDef = sprintf('%s,', columnDef);
         end
-        
+
+        % Append column definition to SQL string
         SQLCommand = sprintf('%s %s', SQLCommand, columnDef);
     end
-    
+
+    % Close CREATE TABLE statement
     SQLCommand = sprintf('%s );', SQLCommand);
-
-
 end
+
 
