@@ -1,28 +1,42 @@
 function mode = MS2ModeFromMSdata(PrecursorMassList)
-    % Entscheidet, ob DDA oder DIA anhand der Nachkommastellen der Precursor-Massen
-    
-    % Nur die ersten 10 Werte
+%MS2MODEFROMMSDATA  Determine MS2 acquisition mode (DDA or DIA) from precursor masses.
+%
+%   mode = MS2ModeFromMSdata(PrecursorMassList)
+%   Determines whether MS2 data was acquired in DDA or DIA mode based on
+%   the decimal pattern of precursor masses.
+%
+%   The heuristic assumes DIA data if most precursor masses show a fixed
+%   decimal pattern (3rd and 4th decimal places equal to zero).
+%
+%   Input:
+%     PrecursorMassList - Vector of precursor m/z values
+%
+%   Output:
+%     mode              - "DIA" or "DDA"
+%
+
+    % Only evaluate the first up to 10 precursor masses
     nCheck = min(10, length(PrecursorMassList));
     precursors = PrecursorMassList(1:nCheck);
-    
-    % Zähle, wie viele dieser Massen die 3. und 4. Nachkommastelle als 0 haben
+
+    % Count how many precursor masses match the DIA decimal pattern
     countDIApattern = 0;
-    
+
     for i = 1:nCheck
         if isnan(precursors(i))
             continue;
         end
-    
-        % String mit 4 Nachkommastellen
+
+        % Format mass with four decimal places
         str = sprintf('%.4f', precursors(i));
-    
-        % Hol die 3. und 4. Nachkommastelle
+
+        % Check if 3rd and 4th decimal places are zero
         if length(str) >= 7 && strcmp(str(end-1:end), '00')
             countDIApattern = countDIApattern + 1;
         end
     end
-    
-    % Entscheidung: Wenn mindestens 8 der 10 Precursor-Massen diesem Muster entsprechen
+
+    % Decision rule
     if countDIApattern >= 8
         mode = "DIA";
     else
