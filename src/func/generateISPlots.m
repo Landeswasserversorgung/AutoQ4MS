@@ -1,20 +1,37 @@
 function generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
+%GENERATEISPLOTS  Plot internal standard (IS) performance metrics over time.
+%   generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
+%   Queries IS metrics from the database for the specified time range and
+%   polarity, filters columns using the IS dictionary, and updates the given
+%   axes with time series plots:
+%     - RT deviation (seconds, centered by median per compound)
+%     - Mass accuracy (ppm)
+%     - Normalized intensity (log scale)
+%
+%   Inputs:
+%     polarity   - '+' or '-' to select positive/negative mode
+%     startDate  - Start datetime (or datenum) for the query range
+%     endDate    - End datetime (or datenum) for the query range
+%     axesStruct - Struct containing axes handles:
+%                 .RT, .MA, .Intensity
+%     Parameters - Project parameters struct (paths, thresholds, device control limits)
+%
 
-    % --- Vorbereitung ---
+    %% Prepare date strings for SQL queries
     startDateStr = datestr(startDate, 'yyyy-mm-dd HH:MM:SS');
-    endDateStr = datestr(endDate, 'yyyy-mm-dd HH:MM:SS');
-    
+    endDateStr   = datestr(endDate,   'yyyy-mm-dd HH:MM:SS');
+
+    % Determine the internal standard key based on polarity
     if polarity == '+'
-        
         ISKey = 'IS_pos';
     else
-        
         ISKey = 'IS_neg';
     end
-    
-    markers = repmat({'o-','*-','x-','s-','d-','^-','v-','>-','<-'}',20,1);
 
-    % === Import Internal Standards ===
+    % Marker styles for multiple series
+    markers = repmat({'o-','*-','x-','s-','d-','^-','v-','>-','<-'}', 20, 1);
+
+    %% Import internal standards table and build dictionary
     optsIS = detectImportOptions(Parameters.path.ISExcel);
     optsIS = setvartype(optsIS, {'ID','Name','Formula','Adduct_pos','Adduct_neg'}, 'string');
     optsIS = setvartype(optsIS, {'IS_pos','IS_neg'}, 'logical');
@@ -24,30 +41,32 @@ function generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
 
     ISdict = containers.Map('KeyType', 'char', 'ValueType', 'any');
     for i = 1:height(T2)
-        is = InternalStandard(T2(i,:));
-        ISdict(char(is.ID)) = is;
+        isObj = InternalStandard(T2(i,:));
+        ISdict(char(isObj.ID)) = isObj;
     end
 
-    %% === RT Deviation ===
-    [ISRTTable,~] = SQLRequest(startDateStr, endDateStr, polarity, 'foundRT', 'ISValue', '', '', Parameters);
+    %% RT deviation (centered per compound by median; converted to seconds)
+    [ISRTTable, ~] = SQLRequest(startDateStr, endDateStr, polarity, 'foundRT', 'ISValue', '', '', Parameters);
     ISRTTable = filterIS(ISRTTable, ISdict, ISKey);
-    
+
     columnNames = ISRTTable.Properties.VariableNames;
     for i = 1:numel(columnNames)
-        if strcmp(columnNames{i},'datetime_aq'), continue; end
+        if strcmp(columnNames{i}, 'datetime_aq')
+            continue;
+        end
         ISRTTable.(columnNames{i}) = (ISRTTable.(columnNames{i}) - ...
-            median(ISRTTable.(columnNames{i}),'omitnan')) * 60;
+            median(ISRTTable.(columnNames{i}), 'omitnan')) * 60;
     end
-    
-    series = ISRTTable{:, 2:end};
+
+    series     = ISRTTable{:, 2:end};
     medianVals = median(series, 2, 'omitnan');
-    dates = datetime(ISRTTable.datetime_aq, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-    
+    dates      = datetime(ISRTTable.datetime_aq, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+
     ax = axesStruct.RT;
     cla(ax);
     hold(ax, 'on');
-    for i = 1:size(series,2)
-        plot(ax, dates, series(:,i), markers{i}, 'DisplayName', columnNames{i+1});
+    for i = 1:size(series, 2)
+        plot(ax, dates, series(:, i), markers{i}, 'DisplayName', columnNames{i+1});
     end
     plot(ax, dates, medianVals, '-k', 'DisplayName', 'Median');
     hideYLine(yline(ax, Parameters.DeviceControl.RT_lowerLimit, '--k', 'Lower'));
@@ -55,49 +74,49 @@ function generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
     hideYLine(yline(ax, Parameters.DeviceControl.RT_upperLimit, '--k', 'Upper'));
     hold(ax, 'off');
     ylabel(ax, 'Retention time deviation / s');
-    xlabel(ax, '') ; 
+    xlabel(ax, '');
     title(ax, 'RT Deviation');
     legend(ax, 'Location', 'eastoutside', 'Interpreter', 'none');
     ylim(ax, [-20 20]);
 
-    %% === Mass Accuracy ===
-    [ISmassaccuracyTable,~] = SQLRequest(startDateStr, endDateStr, polarity, 'massaccuracy', 'ISValue', '', '', Parameters);
+    %% Mass accuracy
+    [ISmassaccuracyTable, ~] = SQLRequest(startDateStr, endDateStr, polarity, 'massaccuracy', 'ISValue', '', '', Parameters);
     ISmassaccuracyTable = filterIS(ISmassaccuracyTable, ISdict, ISKey);
-    
-    series = ISmassaccuracyTable{:, 2:end};
+
+    series     = ISmassaccuracyTable{:, 2:end};
     medianVals = median(series, 2, 'omitnan');
-    dates = datetime(ISmassaccuracyTable.datetime_aq, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-    
+    dates      = datetime(ISmassaccuracyTable.datetime_aq, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+
     ax = axesStruct.MA;
     cla(ax);
     hold(ax, 'on');
-    for i = 1:size(series,2)
-        plot(ax, dates, series(:,i), markers{i}, 'DisplayName', ISmassaccuracyTable.Properties.VariableNames{i+1});
+    for i = 1:size(series, 2)
+        plot(ax, dates, series(:, i), markers{i}, 'DisplayName', ISmassaccuracyTable.Properties.VariableNames{i+1});
     end
     plot(ax, dates, medianVals, '-k', 'DisplayName', 'Median');
     hideYLine(yline(ax, -Parameters.DeviceControl.massaccuracy, '--k', 'Lower'));
     hideYLine(yline(ax, 0, '--k'));
-    hideYLine(yline(ax, Parameters.DeviceControl.massaccuracy, '--k', 'Upper'));
+    hideYLine(yline(ax,  Parameters.DeviceControl.massaccuracy, '--k', 'Upper'));
     hold(ax, 'off');
     ylabel(ax, 'Mass accuracy / ppm');
-    xlabel(ax, '') ; 
+    xlabel(ax, '');
     title(ax, 'Mass Accuracy');
     legend(ax, 'Location', 'eastoutside', 'Interpreter', 'none');
     ylim(ax, [-20 20]);
 
-    %% === Intensity ===
-    [normISintensityTable,~] = SQLRequest(startDateStr, endDateStr, polarity, 'normIntensities', 'ISValue', '', '', Parameters);
+    %% Normalized intensity
+    [normISintensityTable, ~] = SQLRequest(startDateStr, endDateStr, polarity, 'normIntensities', 'ISValue', '', '', Parameters);
     normISintensityTable = filterIS(normISintensityTable, ISdict, ISKey);
- 
-    series = normISintensityTable{:, 2:end};
+
+    series     = normISintensityTable{:, 2:end};
     medianVals = median(series, 2, 'omitnan');
-    dates = datetime(normISintensityTable.datetime_aq, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
-    
+    dates      = datetime(normISintensityTable.datetime_aq, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+
     ax = axesStruct.Intensity;
     cla(ax);
     hold(ax, 'on');
-    for i = 1:size(series,2)
-        plot(ax, dates, series(:,i), markers{i}, 'DisplayName', normISintensityTable.Properties.VariableNames{i+1});
+    for i = 1:size(series, 2)
+        plot(ax, dates, series(:, i), markers{i}, 'DisplayName', normISintensityTable.Properties.VariableNames{i+1});
     end
     plot(ax, dates, medianVals, '-k', 'DisplayName', 'Median');
     hideYLine(yline(ax, Parameters.DeviceControl.intensity_lowerLimit, '--k', 'Lower'));
@@ -108,15 +127,14 @@ function generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
     ylim(ax, [0.1, 10]);
     hold(ax, 'off');
     ylabel(ax, 'Relative intensity');
-    xlabel(ax, '') ; 
+    xlabel(ax, '');
     title(ax, 'Intensity');
     legend(ax, 'Location', 'eastoutside', 'Interpreter', 'none');
-
 end
 
-
 function hideYLine(h)
-    % Entfernt yline aus der Legende
+%HIDEYLINE  Remove a yline from legend display.
+%% NOTE (DE): Hilfsfunktion – blendet yline in der Legende aus.
     set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
 end
 
