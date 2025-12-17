@@ -1,35 +1,37 @@
-% ========== MTSLITE HEADER START ==========\n% Author: Linus Straehle
+% ========== MTSLITE HEADER START ==========
+% Author: Linus Straehle
 % Project: MTSlite
 % License: MIT License
 % Year: 2025
-% ========== MTSLITE HEADER END ============\n\n\n\n\n\n\n\n\n\n\n\n\n
-function update_header(rootDir)
-    % UPDATE_HEADER Entfernt alte Header und fügt neue Marker-Header in allen .m-Dateien ein.
-    %
-    %   update_header(rootDir)
-    %   rootDir: Pfad zum Projektordner.
+% ========== MTSLITE HEADER END ============
 
-    % === KONFIGURATION ===
+function update_header(rootDir)
+%UPDATE_HEADER  Remove old headers and insert a new marker-based header into all .m files.
+%
+%   update_header(rootDir)
+%   rootDir: Path to the project root folder.
+
+    %% Configuration
     author  = 'Linus Straehle';
     project = 'MTSlite';
     license = 'MIT License';
     year    = datestr(now, 'yyyy');
 
-    % Dateinamen für alternative Header
+    % Filenames for alternative headers
     alt1 = {'special1.m', 'tool1.m'};
     alt2 = {'special2.m'};
     alt3 = {'special3.m'};
 
-    % === Header-Templates erzeugen ===
-    stdHeader  = generateHeader( author, project, license, year );
+    %% Build header templates
+    stdHeader  = generateHeader(author, project, license, year);
     altHeader1 = generateAltHeader(author, 'Spezialmodul 1');
     altHeader2 = generateAltHeader(author, 'Toolset 2');
     altHeader3 = generateAltHeader(author, 'Speziell 3');
 
-    % === Alle .m-Dateien finden ===
+    %% Find all .m files recursively
     files = getAllMFiles(rootDir);
 
-    % === Header in jeder Datei updaten ===
+    %% Update header for each file
     for k = 1:numel(files)
         fp = files{k};
         [~, name, ext] = fileparts(fp);
@@ -49,47 +51,47 @@ function update_header(rootDir)
     end
 end
 
-%% ---- Hilfsfunktionen ----
+%% ---- Helper functions ----
 
 function header = generateHeader(author, project, license, year)
-    % GENERATEHEADER Erstellt den Standard-Header mit Markern.
+%GENERATEHEADER  Create the default marker header.
     startM = '';
     header = [startM, body, endM, '\n'];
 end
 
 function header = generateAltHeader(author, note)
-    % GENERATEALTHEADER Erstellt einen alternativen Header mit Anmerkung.
+%GENERATEALTHEADER  Create an alternative marker header with a note.
     startM = '';
     header = [startM, body, endM, '\n'];
 end
 
 function files = getAllMFiles(folder)
-    % GETALLMFILES Listet alle .m-Dateien rekursiv auf.
+%GETALLMFILES  Recursively list all .m files under a folder.
     info = dir(fullfile(folder, '**', '*.m'));
     files = fullfile({info.folder}, {info.name});
 end
 
 function insertOrUpdateHeader(filePath, newHeader)
-    % INSERTORUPDATEHEADER Löscht alte Header-Blöcke und fügt newHeader ein.
+%INSERTORUPDATEHEADER  Remove existing header blocks and prepend newHeader.
 
-    % Marker genauso wie in generateHeader:
+    % Marker must match the one used in generateHeader:
     startM = '';
 
-    % 1) Einlesen
+    % 1) Read file contents
     fid = fopen(filePath, 'r');
     if fid < 0
-        warning('Kann nicht öffnen: %s', filePath);
+        warning('Cannot open file: %s', filePath);
         return;
     end
     txt = fread(fid, '*char')';
     fclose(fid);
 
-    % 2) Alle existierenden Header-Blöcke entfernen
+    % 2) Remove all existing header blocks
     idx = strfind(txt, startM);
     while ~isempty(idx)
         s = idx(1);
         eList = strfind(txt, endM);
-        ePos = eList(find(eList > s,1,'first'));
+        ePos = eList(find(eList > s, 1, 'first'));
         if isempty(ePos)
             break;
         end
@@ -98,16 +100,17 @@ function insertOrUpdateHeader(filePath, newHeader)
         idx = strfind(txt, startM);
     end
 
-    % 3) Neuen Header voranstellen
+    % 3) Prepend new header
     updated = [newHeader, txt];
 
-    % 4) Alle abschließenden '\n' entfernen
+    % 4) Remove trailing newline characters
     while ~isempty(updated) && updated(end) == newline
         updated(end) = [];
     end
 
-    % 5) Speichern
+    % 5) Write back to disk
     fid = fopen(filePath, 'w');
     fwrite(fid, updated);
     fclose(fid);
 end
+
