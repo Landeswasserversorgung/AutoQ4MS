@@ -1,9 +1,8 @@
-%% MTSlite - Parameter Initialization Script (new)
-% Configuration script for initializing the Parameters struct used by MTSlite.
+%%  Parameter Initialization Script
+% Configuration script for initializing the Parameters struct used by AutoQ4MS.
 
 clearvars -except installationfilepath;
 clc;
-
 
 %% Set working directory to script location
 thisFile = mfilename('fullpath');
@@ -15,47 +14,42 @@ Parameters = struct();
 
 %% ========== 1. General Paths & Configuration ==========
 Parameters.General.MSdataending = ".mzXML";
-Parameters.General.RawMS_Format =".wiff";
+Parameters.General.RawMS_Format = ".wiff";
 Parameters.General.timestamp_of_measurement = 4; % 1 = now; 2 = file metadata; 3 = creation date
 Parameters.General.sampling_timestamp = 1;        % 0 = NaT; 1 = now; etc.
 
 Parameters.isOn.deletemzXML = false;
 
 % Base tools and executable paths
-
-Parameters.path.MATLABexe = "Test";% matlab.exe
-Parameters.path.proteoWizard = "";% msconvert.exe
-Parameters.path.psqlExe = "";% psql.exe
+Parameters.path.MATLABexe = "Test"; % matlab.exe
+Parameters.path.proteoWizard = "";  % msconvert.exe
+Parameters.path.psqlExe = "";       % psql.exe
 Parameters.path.desktop = "";
-% MS Data source and archive
+
+% MS data source and archive
 Parameters.path.MSDataSource = "";
-Parameters.path.savedMSData ="";
+Parameters.path.savedMSData = "";
 
-% Proccessing order
-Parameters.General.SampleOrder = 1; % 0 = Modification Date, 1 = Name (A-Z)
-
+% Processing order
+Parameters.General.SampleOrder = 1; % 0 = modification date, 1 = name (A-Z)
 
 % Program base directory
 scriptDir = fileparts(mfilename('fullpath'));
 parentDir = fileparts(scriptDir);
 Parameters.path.program = string(fileparts(parentDir));
-% scriptDir = fileparts(mfilename('fullpath')); % folder of the script
-% parentDir = fileparts(scriptDir);            % 
-% Parameters.path.program = string(fileparts(parentDir)); % folder of the program
 
 % Excel files
-Parameters.path.ISExcel   = fullfile(Parameters.path.program, 'data', 'Import', 'InternalStandards_Zorbax.xlsx');
+Parameters.path.ISExcel = fullfile(Parameters.path.program, 'data', 'Import', 'InternalStandards_Zorbax.xlsx');
 Parameters.path.CompExcel = fullfile(Parameters.path.program, 'data', 'Import', 'Components_Zorbax.xlsx');
 
 %% ========== 2. E-Mail Notification Settings ==========
-
 Parameters.Mail.On = false;
-Parameters.Mail.Receiver = [""] ;
+Parameters.Mail.Receiver = [""];
 Parameters.Mail.Sender = "";
-%% ========== 3. Database Configuration ==========
 
-Parameters.database.host = ''; % should be localhost
-Parameters.database.port = ''; % should be 5432
+%% ========== 3. Database Configuration ==========
+Parameters.database.host = '';     % should be localhost
+Parameters.database.port = '';     % should be 5432
 Parameters.database.dbname = '';
 Parameters.database.username = ''; % should be postgres
 Parameters.database.password = ''; % should be encrypted
@@ -73,15 +67,15 @@ Parameters.MS1.MSDataRange = [1, 30];
 
 %% ========== 5. MS2 Processing Settings ==========
 Parameters.MS2.libname = "lib1";
-Parameters.MS2.minIntensity = 20; % Remove noise During MS2 Check
-Parameters.MS2.minIntensityRelative = 5; % Minimum Intensity to filter Noise during Generation of Library
+Parameters.MS2.minIntensity = 20;          % Remove noise during MS2 check
+Parameters.MS2.minIntensityRelative = 5;   % Minimum intensity during library generation
 Parameters.MS2.mzTolerance_ppm = 20;
 Parameters.MS2.binWidth = 0.5;
 Parameters.MS2.binOffset = 0.2;
 Parameters.MS2.threshold = 10;
-Parameters.MS2.removePrecursor = true; % During generation and Check 
-Parameters.MS2.From = 1;  % 1 = from MS data
-Parameters.path.MS2_ReferencePath = ""; %Path for MS2 Library Reference Samples (Standards)
+Parameters.MS2.removePrecursor = true;     % During generation and check
+Parameters.MS2.From = 1;                   % 1 = from MS data
+Parameters.path.MS2_ReferencePath = "";    % Path for MS2 library reference samples (standards)
 
 %% ========== 6. Chromatography Settings ==========
 Parameters.chroma.RTToleranceInSec = 9;
@@ -115,50 +109,54 @@ Parameters.TaskManager.Interval = 5;
 Parameters.TaskManager.GuiOn = true;
 
 %% ========== 10. Database Table Definitions ==========
-
-% Sample Master Table
-Names = {'SampleID', 'polarity', 'type', 'datetime_aq', 'datetime_samp',  'ISCheck','RTCorrection' }';
-DataTypes = {'VARCHAR', 'CHAR', 'VARCHAR', 'timestamp without time zone', 'timestamp without time zone',  'BOOLEAN', 'DOUBLE PRECISION'}';
-Lengths = {[], 1, 10, [], [],  [],[], }';
-Scales = {[], [], [], [], [],  [], []}';
-NotNull = {true, true, true, true, false,  false,  false}';
-PrimaryKey = {true, false, false, false, false,  false,  false}';
+% SampleMaster table
+Names = {'SampleID', 'polarity', 'type', 'datetime_aq', 'datetime_samp', 'ISCheck', 'RTCorrection'}';
+DataTypes = {'VARCHAR', 'CHAR', 'VARCHAR', 'timestamp without time zone', 'timestamp without time zone', 'BOOLEAN', 'DOUBLE PRECISION'}';
+Lengths = {[], 1, 10, [], [], [], []}';
+Scales = {[], [], [], [], [], [], []}';
+NotNull = {true, true, true, true, false, false, false}';
+PrimaryKey = {true, false, false, false, false, false, false}';
 
 tableMeta = table(Names, DataTypes, Lengths, Scales, NotNull, PrimaryKey);
 Parameters.database.tables.SampleMaster = tableMeta;
 
-% ISValue Table
-Names = {'SampID', 'ID', 'Name', 'RT', 'foundRT','normRT','deltaRT','intensity', 'normIntensities','identificationConfidence','similarity', 'massaccuracy', 'ISCheck', 'IS', ...
-         'EICScanTime', 'EICIntensity', 'PeakMaxMSmz', 'PeakMaxMSintensity', 'MS2mz', 'MS2_intensity'}';
-DataTypes = {'VARCHAR', 'VARCHAR', 'VARCHAR', 'DOUBLE PRECISION','DOUBLE PRECISION','DOUBLE PRECISION','DOUBLE PRECISION','DOUBLE PRECISION', 'DOUBLE PRECISION', 'VARCHAR', 'DOUBLE PRECISION','DOUBLE PRECISION', ...
-             'BOOLEAN', 'BOOLEAN', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', ...
-             'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]'}';
-Lengths = {100, 10, 100, [], [], [], [], [], [], 35,  [],[],[], [], [], [], [], [], [], []}';
-Scales = {[], [], [], [], [], [], [] ,[], [], [], [], [], [], [],[], [], [], [], [], []}';
-NotNull = {true, true, true, false, false ,false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}';
-PrimaryKey = {false, false, false, false ,false, false, false, false, false,false, false,  false, false, false, false, false, false, false, false, false}';
+% ISValue table
+Names = { ...
+    'SampID', 'ID', 'Name', 'RT', 'foundRT', 'normRT', 'deltaRT', 'intensity', 'normIntensities', ...
+    'identificationConfidence', 'similarity', 'massaccuracy', 'ISCheck', 'IS', ...
+    'EICScanTime', 'EICIntensity', 'PeakMaxMSmz', 'PeakMaxMSintensity', 'MS2mz', 'MS2_intensity'}';
+DataTypes = { ...
+    'VARCHAR', 'VARCHAR', 'VARCHAR', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', ...
+    'VARCHAR', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'BOOLEAN', 'BOOLEAN', ...
+    'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]'}';
+Lengths = {100, 10, 100, [], [], [], [], [], [], 35, [], [], [], [], [], [], [], [], [], []}';
+Scales = {[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []}';
+NotNull = {true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}';
+PrimaryKey = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}';
 
 tableMeta = table(Names, DataTypes, Lengths, Scales, NotNull, PrimaryKey);
 Parameters.database.tables.ISValue = tableMeta;
 
-% ComponentValue Table
-
-Names = {'SampID', 'ID', 'Name', 'RT', 'foundRT','normRT','deltaRT','intensity', 'normIntensities', 'identificationConfidence','similarity', 'massaccuracy', ...
-         'EICScanTime', 'EICIntensity', 'noise', 'baseline', 'peakwindow', 'noisewindow', ...
-         'PeakMaxMSmz', 'PeakMaxMSintensity', 'MS2mz', 'MS2_intensity'}';
-DataTypes = {'VARCHAR', 'VARCHAR', 'VARCHAR', 'DOUBLE PRECISION','DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION' 'DOUBLE PRECISION', 'DOUBLE PRECISION', ...
-             'VARCHAR', 'DOUBLE PRECISION','DOUBLE PRECISION', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'INTEGER', 'INTEGER',...
-             'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]',...
-             'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]'}';
-Lengths = {100, 10, 150, [], [], [], [], [], [],35, [], [], [], [], [], [], [], [], [], [], [], []}';
-Scales = {[], [], [], [], [], [], [], [], [], [], [],  [], [],[], [], [], [], [], [], [], [], []}';
-NotNull = {true, true, true, false, false,false,false, false,false, false,false, false, false, false, false, false, false, false, false, false, false, false}';
-PrimaryKey = {false, false, false, false, false,false,false,false, false,false, false, false, false, false, false, false, false, false, false, false, false, false}';
+% ComponentValue table
+Names = { ...
+    'SampID', 'ID', 'Name', 'RT', 'foundRT', 'normRT', 'deltaRT', 'intensity', 'normIntensities', ...
+    'identificationConfidence', 'similarity', 'massaccuracy', ...
+    'EICScanTime', 'EICIntensity', 'noise', 'baseline', 'peakwindow', 'noisewindow', ...
+    'PeakMaxMSmz', 'PeakMaxMSintensity', 'MS2mz', 'MS2_intensity'}';
+DataTypes = { ...
+    'VARCHAR', 'VARCHAR', 'VARCHAR', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION', ...
+    'VARCHAR', 'DOUBLE PRECISION', 'DOUBLE PRECISION', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'INTEGER', 'INTEGER', ...
+    'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', ...
+    'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]', 'DOUBLE PRECISION[]'}';
+Lengths = {100, 10, 150, [], [], [], [], [], [], 35, [], [], [], [], [], [], [], [], [], [], [], []}';
+Scales = {[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []}';
+NotNull = {true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}';
+PrimaryKey = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false}';
 
 tableMeta = table(Names, DataTypes, Lengths, Scales, NotNull, PrimaryKey);
 Parameters.database.tables.ComponentValue = tableMeta;
 
-% Warnings Table
+% Warnings table
 Names = {'datetime', 'String', 'Warning_type'}';
 DataTypes = {'timestamp without time zone', 'VARCHAR', 'VARCHAR'}';
 Lengths = {[], [], 20}';
@@ -172,6 +170,8 @@ Parameters.database.tables.Warnings = tableMeta;
 %% Save final Parameters struct
 save(fullfile(Parameters.path.program, 'data', 'Import', 'methods', 'Parameters.mat'), 'Parameters');
 
-
+%% NOTE (DE): Keine Logikänderung – nur Kommentar-Sprache und Formatierung vereinheitlicht.
+%% NOTE (DE): Die Tabellen-Definitionen sind bewusst als Metadaten-Tabellen aufgebaut (Names/DataTypes/...).
+%% NOTE (DE): Der Pfad Parameters.path.program wird relativ zur Skriptposition berechnet.
 
 
