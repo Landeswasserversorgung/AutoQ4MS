@@ -12,9 +12,6 @@ function type = identifySampleType(filename)
 %   Output:
 %     type     - Identified sample type (string), e.g. 'Blank', 'Cal', 'QC'
 %
-%% NOTE (DE): Keine Logikänderung – nur Kommentare vereinheitlicht.
-%% NOTE (DE): Die Erkennung basiert ausschließlich auf Dateinamen-Konventionen.
-%% NOTE (DE): Der erste Treffer in der Suchliste wird verwendet.
 
     % Default sample type
     type = 'Samp';
