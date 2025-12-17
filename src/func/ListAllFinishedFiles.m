@@ -1,4 +1,20 @@
 function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
+%LISTALLFINISHEDFILES  Recursively list files that appear "finished" and are not yet in destination.
+%
+%   newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
+%   Recursively scans a source directory and returns a list of file paths that:
+%     - are NOT related to the currently written sample (derived from a .bak file),
+%     - were not modified within the last minute,
+%     - and do not yet exist in the destination directory.
+%
+%   Inputs:
+%     srcDir  - Source directory to scan
+%     destDir - Destination directory used to check whether files already exist
+%
+%   Output:
+%     newFilesPaths - String array of file paths in srcDir that meet the criteria
+%
+
     % Check if the source directory exists
     if ~isfolder(srcDir)
         error('Source directory does not exist: %s', srcDir);
@@ -9,19 +25,22 @@ function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
         mkdir(destDir);
     end
 
-    % Initialize the output cell array
+    % Initialize output (string array style)
     newFilesPaths = "";
 
-    % Get all contents in the source directory
+    % List directory contents
     srcContents = dir(srcDir);
-    dates = [srcContents.datenum];                % Numeric datenum values
+
+    % Convert datenum to datetime and store back into srcContents(i).date (char)
+    dates = [srcContents.datenum];
     datetimeArray = datetime(dates, 'ConvertFrom', 'datenum');
     datetimeArray = transpose(datetimeArray);
-    % assign us locale datetime
-    for k=1:numel(datetimeArray)
+
+    for k = 1:numel(datetimeArray)
         srcContents(k).date = char(datetimeArray(k));
     end
-    % Find the current sample name based on the .bak file
+
+    %% Determine the current sample name based on a .bak file
     currentSampleName = 'noSampleDataIsWritten';
     for i = 1:numel(srcContents)
         [~, name, ext] = fileparts(srcContents(i).name);
@@ -31,25 +50,28 @@ function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
         end
     end
 
-    % Loop through all items in the source directory
+    %% Loop through all items in the source directory
     for i = 1:length(srcContents)
+
         % Skip '.', '..' and files related to the current sample
-        if strcmp(srcContents(i).name, '.') || strcmp(srcContents(i).name, '..') || contains(srcContents(i).name, currentSampleName)
+        if strcmp(srcContents(i).name, '.') || strcmp(srcContents(i).name, '..') || ...
+           contains(srcContents(i).name, currentSampleName)
             continue;
         end
 
-        % Construct full paths for source and destination
-        srcItem = fullfile(srcDir, srcContents(i).name);
+        % Build full paths for source and destination items
+        srcItem  = fullfile(srcDir, srcContents(i).name);
         destItem = fullfile(destDir, srcContents(i).name);
 
         if srcContents(i).isdir
-            % If it's a directory, create it in the destination
+            % Mirror directories in destination and recurse
             if ~isfolder(destItem)
                 mkdir(destItem);
             end
-            % Recursively process its contents
-            SubfolderFilesList = ListAllFinishedFiles(srcItem, destItem);
-            newFilesPaths = [newFilesPaths; SubfolderFilesList];
+
+            subfolderFilesList = ListAllFinishedFiles(srcItem, destItem);
+            newFilesPaths = [newFilesPaths; subfolderFilesList];
+
         else
             % Check if the file was modified more than 1 minute ago
             try
@@ -62,13 +84,14 @@ function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
                 continue; % Skip recently modified files
             end
 
-            % Only add to list if file does not already exist in destination
+            % Only add if file does not already exist in destination
             if ~exist(destItem, 'file')
                 newFilesPaths = [newFilesPaths; string(srcItem)];
             end
         end
     end
 
-    % Convert the output to a string array
+    % Ensure output is a string array
     newFilesPaths = string(newFilesPaths);
 end
+
