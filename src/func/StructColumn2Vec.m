@@ -1,32 +1,41 @@
 function Vec = StructColumn2Vec(Struct, Column)
-    % StructColumn2Vec Extracts a column from a structure array into a vector or cell array.
-    %   Vec = StructColumn2Vec(Struct, Column) takes a structure array 'Struct'
-    %   and a column name 'Column' and returns a vector or cell array containing
-    %   the values from that column. Supports both numeric and string data.
-    %   Linus Straehle 2024-04-16
+%STRUCTCOLUMN2VEC  Extract a field from a struct array into a vector.
+%
+%   Vec = StructColumn2Vec(Struct, Column)
+%   Extracts the values of the specified field from a struct array and
+%   returns them as either a numeric vector or a string array, depending
+%   on the field content.
+%
+%   Inputs:
+%     Struct - Struct array containing the requested field
+%     Column - Name of the field to extract (string or char)
+%
+%   Output:
+%     Vec    - Vector (numeric) or string array containing the field values
+%
 
     if isempty(Struct)
         error('The input structure is empty.');
     end
- 
-    % Check the type of the first element to determine how to initialize Vec
+
+    % Determine whether all values in the field are numeric
     numeric = true;
-    for i = 1 : numel(Struct)
+    for i = 1:numel(Struct)
         if ~isnumeric(Struct(i).(Column))
             numeric = false;
             break;
         end
     end
-        
-        
-        if numeric
-            Vec = zeros(numel(Struct), 1);  % Initialize for numeric data
-        else 
-            Vec = strings(numel(Struct), 1);  % Initialize for string data
-        end
 
-        % Fill Vec with the data from the structure
-        for i = 1:numel(Struct)
-            Vec(i) = Struct(i).(Column);
-        end
+    % Preallocate output vector
+    if numeric
+        Vec = zeros(numel(Struct), 1);
+    else
+        Vec = strings(numel(Struct), 1);
+    end
+
+    % Fill output vector with field values
+    for i = 1:numel(Struct)
+        Vec(i) = Struct(i).(Column);
+    end
 end
