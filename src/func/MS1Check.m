@@ -32,9 +32,7 @@ function [RT_peak_max_min, peak_max_intensity, noisewindow, peakwindow, noise, N
 %     NoiseCheck          - Logical flag indicating whether the peak passes noise criteria
 %     baseline            - Baseline estimate (median intensity) within selected noise window
 %
-%% NOTE (DE): Keine Logikänderung – nur Kommentare/Struktur vereinheitlicht.
-%% NOTE (DE): scanTimes werden als Minuten interpretiert, alle Window_* Variablen in Sekunden.
-%% NOTE (DE): Es wird links und rechts vom Peak ein Noise-Fenster geprüft; das kleinere Noise wird verwendet.
+
 
     % Expand the initial peak search window for blanks
     if isblank
