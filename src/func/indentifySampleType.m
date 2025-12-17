@@ -1,19 +1,32 @@
-function type = indentifySampleType(filename)
-%% This function identifies the sample type based on the filename
-%   Linus Str�hle 2024-03-28
+function type = identifySampleType(filename)
+%IDENTIFYSAMPLETYPE  Identify the sample type based on the filename.
+%
+%   type = identifySampleType(filename)
+%   Determines the sample type by searching for predefined keywords
+%   within the given filename. If no keyword is found, the default
+%   type 'Samp' is returned.
+%
+%   Input:
+%     filename - Filename or full file path (string or char)
+%
+%   Output:
+%     type     - Identified sample type (string), e.g. 'Blank', 'Cal', 'QC'
+%
+%% NOTE (DE): Keine Logikänderung – nur Kommentare vereinheitlicht.
+%% NOTE (DE): Die Erkennung basiert ausschließlich auf Dateinamen-Konventionen.
+%% NOTE (DE): Der erste Treffer in der Suchliste wird verwendet.
 
-type = 'Samp';
+    % Default sample type
+    type = 'Samp';
 
-String = filename;
-searchString = {'Blank', 'Cal','AIO-Mix', 'Mix', 'PreRun','Roth', 'QC'};
+    % Keywords used to identify sample types
+    searchString = {'Blank', 'Cal', 'AIO-Mix', 'Mix', 'PreRun', 'Roth', 'QC'};
 
-
-for i = 1:length(searchString)
-    if contains(String, searchString{i})
-        type = searchString{i};
-        break;
+    % Search for known identifiers in the filename
+    for i = 1:length(searchString)
+        if contains(filename, searchString{i})
+            type = searchString{i};
+            break;
+        end
     end
 end
-
-end
-
