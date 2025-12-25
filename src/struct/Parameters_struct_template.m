@@ -170,8 +170,4 @@ Parameters.database.tables.Warnings = tableMeta;
 %% Save final Parameters struct
 save(fullfile(Parameters.path.program, 'data', 'Import', 'methods', 'Parameters.mat'), 'Parameters');
 
-%% NOTE (DE): Keine Logikänderung – nur Kommentar-Sprache und Formatierung vereinheitlicht.
-%% NOTE (DE): Die Tabellen-Definitionen sind bewusst als Metadaten-Tabellen aufgebaut (Names/DataTypes/...).
-%% NOTE (DE): Der Pfad Parameters.path.program wird relativ zur Skriptposition berechnet.
-
 
