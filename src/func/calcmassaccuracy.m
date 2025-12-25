@@ -53,7 +53,8 @@ try
         intensityValues = msdata(indices(i)).ScanData(:, 2);
 
         % Keep only values within ±X ppm around the target m/z
-        ppmTol = (exactmz * Parameters.MS1.XICWidth_ppm) / 1e6;
+        
+        ppmTol = (exactmz * Parameters.MS1.XICtolerance_ppm) / 1e6;
         keepindex = abs(mz_values - exactmz) < ppmTol;
 
         intensityValues = intensityValues(keepindex);

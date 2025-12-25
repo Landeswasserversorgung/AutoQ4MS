@@ -106,6 +106,7 @@ function processing(methodPath)
         disp('Processing finished');
         disp('******************************************************************');
         pause(5);
+        delete(lockfile);
 
     catch e
         disp('Error in Processing');

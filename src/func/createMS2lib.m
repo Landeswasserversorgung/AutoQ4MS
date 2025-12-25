@@ -118,10 +118,14 @@ for k = 1:nFiles
     [ms1_data, ms2_data] = loadmzxml(mzXMLFilePath);
 
     % Store in base workspace (legacy behavior)
-    uniqueName_ms1 = char("ms1_" + base);
-    uniqueName_ms2 = char("ms2_" + base);
+    
+    uniqueName_ms1 = matlab.lang.makeValidName("ms1_" + base);
+    uniqueName_ms2 = matlab.lang.makeValidName("ms2_" + base);
+    
     assignin('base', uniqueName_ms1, ms1_data);
     assignin('base', uniqueName_ms2, ms2_data);
+
+
     fprintf('Processed %s and saved as %s / %s\n', base, uniqueName_ms1, uniqueName_ms2);
 
     %% Match MS2 spectra to reference table

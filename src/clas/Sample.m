@@ -444,7 +444,7 @@ classdef Sample
 
             % Save figure and embed as Base64
             imgPath = fullfile(Parameters.path.program, 'src', 'mail', 'images', ...
-                sprintf('DeviceControl_%s.png', datestr(now, 'yyyymmdd_HHMMSS')));
+                sprintf('DeviceControl_%s.png', obj.ID));
 
             exportgraphics(fig, imgPath, 'Resolution', 600);
             imgData = fread(fopen(imgPath, 'rb'), '*uint8');
