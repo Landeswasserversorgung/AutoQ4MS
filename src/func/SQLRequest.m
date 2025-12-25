@@ -21,7 +21,14 @@ function [Table, outputPath] = SQLRequest(startDate, endDate, polarity, extract,
 %     outputPath - Full path to the generated CSV output file
 %
    %% Paths
-    outputPath   = strjoin([Parameters.path.program, '\src\database\sqlQueryOutput.csv'], "");
+       uuid = char(java.util.UUID.randomUUID);
+    
+    outputPath = fullfile( ...
+        Parameters.path.program, ...
+        'src', 'database', ...
+        ['sqlQueryOutput_' uuid '.csv'] ...
+    );
+    
     templatePath = strjoin([Parameters.path.program, '\src\database\PivotQueryTemplate.sql'], "");
 
     %% Read template
