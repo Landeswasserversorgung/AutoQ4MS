@@ -1,96 +1,119 @@
-function sampleprocessing(FilePath, Parameters)
-% SAMPLEPROCESSING - Processes a single MS data file from raw input to database entry.
+function processing(methodPath)
+% PROCESSING - Runs the MS data processing pipeline.
 %
-% Parameters:
-%   FilePath   (string, optional): Full path to a .wiff2 file
-%   Parameters (struct, optional): Parameter struct loaded from .mat file
-%
-% If either argument is missing, default values are used.
+% Prevents parallel execution via a lockfile that is ALWAYS cleaned up.
 
-    %% 0. Setup: Set current working directory
-    
-    thisFile = mfilename('fullpath');
-    [thisPath, ~, ~] = fileparts(thisFile);
-    cd(thisPath);
+    clc;
+    clearvars -except methodPath;
 
-    %% 1. Load Parameters if not provided
-    if nargin < 2 || isempty(Parameters)
-        paramPath = fullfile('..', 'data', 'Import','methods', 'Parameters.mat');
-        if ~isfile(paramPath)
-            error('Default Parameters.mat file not found: %s', paramPath);
-        end
-        loaded = load(paramPath, 'Parameters');
-        if ~isfield(loaded, 'Parameters')
-            error('Loaded file does not contain a "Parameters" struct.');
-        end
-        Parameters = loaded.Parameters;
-    end
-
-    %% 2. Use default file if none provided (for testing only)
-    if nargin < 1 || isempty(FilePath)
-        % ⚠️ Consider removing hardcoded file before production use
-        FilePath = "C:\Users\linus\OneDrive\Messdaten\März\22-03-14_Zor04_n_07_137358-02_KW10_Mo_Donau_22-03-07_Inj1.wiff";
-    end
-
-    %% 3. Convert to mzXML format if necessary
-    % Slightly simplify logic
-    if strcmp(".mzXML", Parameters.General.MSdataending)
-        mzXMLFilePath = FilePath;  % Already mzXML
-    else 
-        [~, fileName, ~] = fileparts(FilePath);
-        try
-            mzXMLFilePath = string(x2mzxml(FilePath, fileName, Parameters));
-        catch
-            msg = sprintf('MS data set %s could not be converted — it may be incomplete or corrupted. Deleting.', FilePath);
-            WarningPlusDb(msg, Parameters, 'Processing Setting');
-    
-            % Only delete if the file was actually created
-            if exist('mzXMLFilePath', 'var') && isfile(mzXMLFilePath)
-                delete(mzXMLFilePath);
-            end
-            return;
-        end
-    end
-
-    %% 4. Load MS1 and MS2 data from mzXML
+    %% Prevent multiple instances of the same method
     try
-        [ms1_data, ms2_data] = loadmzxml(mzXMLFilePath);
+        [~, methodname, ~] = fileparts(methodPath);
     catch
-        str = sprintf('MS data set %s could not be loaded — it may be incomplete or corrupted. Deleting.', FilePath);
-        WarningPlusDb(str, Parameters, 'Processing Setting');
-        delete(mzXMLFilePath);
+        methodname = 'Parameters';
+    end
+
+    lockfile = fullfile(tempdir, [char(methodname), '.lock']);
+
+    if exist(lockfile, 'file')
+        fprintf('Another instance is already running. Exiting.\n');
         return;
     end
 
-    %% 5. Create Sample object 
-    Sample1 = Sample(FilePath, ms1_data, ms2_data, Parameters);
-    
+    % --- Create lockfile ---
+    fid = fopen(lockfile, 'w');
+    if fid < 0
+        error('Could not create lockfile: %s', lockfile);
+    end
+    fclose(fid);
 
-    %% 6. Retention time correction and internal standard detection
-    Sample1 = Sample1.RTCorrectionFactor(Parameters);
-    Sample1.toSQL(Parameters);
+    % --- GUARANTEED cleanup ---
+    cleanupLock = onCleanup(@() deleteLockfile(lockfile));
 
-    disp('Internal Standards:');
-    Sample1 = Sample1.dicpeakdetection("ISdic", ms1_data, Parameters);
-    Sample1 = Sample1.dicMS2Check("ISdic", ms2_data, Parameters);
-    Sample1.dic2db("ISdic", Parameters);
-    Sample1.showdic("ISdic");
+    try
+        %% Set working directory to script location
+        thisFile = mfilename('fullpath');
+        [thisPath, ~, ~] = fileparts(thisFile);
+        cd(thisPath);
 
-    disp('Device Control:');
-    Sample1 = Sample1.DeviceControl(Parameters);
+        %% Load Parameters
+        if nargin < 1 || isempty(methodPath)
+            methodPath = fullfile('..', 'data', 'Import', 'methods', 'Parameters.mat');
+        end
 
-    %% 7. Detect and save compounds
-    disp('Components:');
-    Sample1 = Sample1.dicpeakdetection("Compdic", ms1_data, Parameters);
-    Sample1 = Sample1.dicMS2Check("Compdic", ms2_data, Parameters);
-    Sample1.showdic("Compdic");
-    Sample1.dic2db("Compdic", Parameters);
+        if ~isfile(methodPath)
+            error('Parameters file not found: %s', methodPath);
+        end
 
-    %% 8. Optional cleanup
-    if Parameters.isOn.deletemzXML
-        fprintf('Deleting: %s\n', mzXMLFilePath);
-        delete(mzXMLFilePath);
+        disp(methodPath);
+        loaded = load(methodPath, 'Parameters');
+
+        if ~isfield(loaded, 'Parameters')
+            error('The file does not contain a variable named "Parameters".');
+        end
+        Parameters = loaded.Parameters;
+
+        %% Check logs
+        logCount = CountlogFiles(fullfile(Parameters.path.program, 'logs'));
+        if logCount > 0
+            WarningPlusDb( ...
+                sprintf('There are %d log files', logCount), ...
+                Parameters, 'Processing Setting');
+        end
+
+        %% Check failed SQL
+        sqlFailCount = CountsqlFiles(fullfile(Parameters.path.program, 'src', 'database', 'failed'));
+        if sqlFailCount > 0
+            WarningPlusDb( ...
+                sprintf('There are %d failed SQL files', sqlFailCount), ...
+                Parameters, 'Processing Setting');
+        end
+
+        %% Scan for new MS files
+        listNewFilePaths = ListAllFinishedFiles( ...
+            Parameters.path.MSDataSource, ...
+            Parameters.path.savedMSData);
+
+        filteredPaths = listNewFilePaths( ...
+            endsWith(listNewFilePaths, Parameters.General.MSdataending));
+        filteredPaths = filteredPaths(~contains(filteredPaths, 'PreRun'));
+
+        if isempty(filteredPaths)
+            disp('No new MS data found');
+            return;   % 🔒 lockfile still cleaned automatically
+        end
+
+        fprintf('%d MS data sets found\n', numel(filteredPaths));
+
+        %% Sort & process
+        sortedFilePaths = sortFilesByModificationDate(filteredPaths, Parameters);
+
+        for w = 1:numel(sortedFilePaths)
+            fprintf('Processing %d / %d\n', w, numel(sortedFilePaths));
+            FilePath = sortedFilePaths(w);
+
+            sampleprocessing(FilePath, Parameters);
+            CopyMatchingNameParts( ...
+                FilePath, ...
+                Parameters.path.savedMSData, ...
+                Parameters.path.MSDataSource);
+        end
+
+        disp('Processing finished');
+
+    catch e
+        disp('Error in Processing');
+        rethrow(e);   % 🔒 lockfile still cleaned
     end
 end
+
+
+%% --- Helper --------------------------------------------------------------
+function deleteLockfile(lockfile)
+    if exist(lockfile, 'file')
+        delete(lockfile);
+    end
+end
+
 
 
