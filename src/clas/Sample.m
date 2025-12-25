@@ -1,64 +1,67 @@
 classdef Sample
-    % SAMPLE - Class for representing and processing an MS sample.
-    %
-    % This class encapsulates the workflow for processing mass spectrometry
-    % data, including metadata extraction, RT correction, peak detection,
-    % and storage in a relational database.
+%SAMPLE  Class for representing and processing an MS sample.
+%
+%   This class encapsulates the workflow for processing mass spectrometry
+%   data, including metadata extraction, RT correction, peak detection,
+%   MS2 checking, and persistence in a relational database.
 
     properties
-        ID                          % Sample ID (derived from filename)
-        timestamp_of_measurement   % Time of data acquisition
-        sampling_timestamp         % Time the sample was taken
-        Type                        % Sample classification (e.g. Blank, QC)
-        MSMode                      % Ion mode: '+' or '-'
-        MS2Mode                     % MS2 mode: DDA or DIA
-        ISdic                       % Dictionary of Internal Standards
-        Compdic                     % Dictionary of Components
-        ISCheck                     % Boolean or flag if sample passed device checks
-        RTCorrection                % RT correction factor (in seconds)
+        ID                        % Sample ID (derived from filename)
+        timestamp_of_measurement  % Time of data acquisition
+        sampling_timestamp        % Time the sample was taken
+        Type                      % Sample classification (e.g., Blank, QC)
+        MSMode                    % Polarity: '+' or '-'
+        MS2Mode                   % MS2 mode: 'DDA' or 'DIA'
+        ISdic                     % Dictionary (containers.Map) of Internal Standards
+        Compdic                   % Dictionary (containers.Map) of Components
+        ISCheck                   % Flag indicating whether sample passed device checks
+        RTCorrection              % RT correction factor (seconds)
     end
 
     methods
         function obj = Sample(FilePath, ms1_data, ms2_data, Parameters)
-            % Constructor for the Sample class
-            % Loads metadata, sample type, MS mode, and initializes dictionaries.
-        
+            %SAMPLE  Constructor.
+            %   Loads metadata, determines sample type and MS mode, and builds
+            %   internal standard/component dictionaries from Excel files.
+
             [~, filename, ~] = fileparts(FilePath);
             obj.ID = filename;
+
             obj.timestamp_of_measurement = getSampleDate(FilePath, Parameters, Parameters.General.timestamp_of_measurement);
             obj.sampling_timestamp = getSampleDate(FilePath, Parameters, Parameters.General.sampling_timestamp);
+
             obj.Type = indentifySampleType(obj.ID);
             obj.MSMode = char(ms1_data(1).polarity);
-        
+
             if Parameters.MS2.From
                 obj.MS2Mode = MS2ModeFromMSdata(StructColumn2Vec(ms2_data, "PrecursorMass"));
             else
                 obj.MS2Mode = getMS2Mode(filename);
             end
-        
+
             obj.ISCheck = NaN;
             obj.RTCorrection = NaN;
-        
+
             %% Load component dictionary
             optsComp = detectImportOptions(Parameters.path.CompExcel);
             optsComp = setvartype(optsComp, {'ID','Name','Formula','Adduct_pos','Adduct_neg'}, 'string');
             optsComp = setvartype(optsComp, {'RT','mz_pos','mz_neg'}, 'double');
             T = readtable(Parameters.path.CompExcel, optsComp);
-        
+
             componentDict = containers.Map('KeyType', 'char', 'ValueType', 'any');
             for i = 1:height(T)
                 comp = Component(T(i,:));
                 componentDict(char(comp.ID)) = comp;
             end
             obj.Compdic = componentDict;
-        
+
             %% Load internal standards dictionary
             optsIS = detectImportOptions(Parameters.path.ISExcel);
             optsIS = setvartype(optsIS, {'ID','Name','Formula','Adduct_pos','Adduct_neg'}, 'string');
             optsIS = setvartype(optsIS, {'IS_pos','IS_neg'}, 'logical');
             optsIS = setvartype(optsIS, {'RT','mz_pos','mz_neg'}, 'double');
             T2 = readtable(Parameters.path.ISExcel, optsIS);
-        
+
             ISdict = containers.Map('KeyType', 'char', 'ValueType', 'any');
             for i = 1:height(T2)
                 is = InternalStandard(T2(i,:));
@@ -66,46 +69,47 @@ classdef Sample
             end
             obj.ISdic = ISdict;
         end
-        %% RT Correction Factor based on historical IS RT values in defined sample type
+
+        %% RT correction factor based on historical IS RT values (defined sample type)
         function obj = RTCorrectionFactor(obj, Parameters)
             if Parameters.chroma.RTcorrON
-                try 
+                try
                     % Skip correction if sample type matches exclusion type
-                    if strcmp(obj.Type, Parameters.chroma.TypeforRTCorr) 
+                    if strcmp(obj.Type, Parameters.chroma.TypeforRTCorr)
                         obj.RTCorrection = NaN;
                         return;
                     end
-        
+
                     % Define time window for RT correction
                     nowDate = obj.timestamp_of_measurement;
                     startDate = obj.timestamp_of_measurement - days(Parameters.chroma.maxdaydistanceforRTcorr);
-        
+
                     % Format timestamps for database query
                     nowDateStr = datestr(nowDate, 'yyyy-mm-dd HH:MM:SS');
                     startDateStr = datestr(startDate, 'yyyy-mm-dd HH:MM:SS');
-        
+
                     % Define query parameters
                     extract = 'foundRT';
                     Table = 'ISValue';
                     DBISCheck = 'true';
                     SampleType = Parameters.chroma.TypeforRTCorr;
-        
+
                     % Query database for IS RT data
                     [ISRTTable, ~] = SQLRequest(startDateStr, nowDateStr, obj.MSMode, extract, Table, DBISCheck, SampleType, Parameters);
                     if height(ISRTTable) == 0
                         error('No data in table');
                     end
-        
-                    
-                    % Determine MS mode and corresponding IS key and threshold
+
+                    % Determine polarity key for IS filtering
                     if strcmp(obj.MSMode, '+')
                         ISKey = 'IS_pos';
-                    else 
+                    else
                         ISKey = 'IS_neg';
                     end
+
                     % Filter out irrelevant IS columns
                     ISRTTable = filterIS(ISRTTable, obj.ISdic, ISKey);
-        
+
                     % Normalize retention times to target RT in seconds
                     columnNames = ISRTTable.Properties.VariableNames;
                     for i = 1:numel(columnNames)
@@ -113,26 +117,27 @@ classdef Sample
                         if strcmp(columnName, 'datetime_aq'), continue; end
                         ISRTTable.(columnName) = (ISRTTable.(columnName) - obj.ISdic(columnName).RT) * 60;
                     end
-        
+
                     % Use latest values to calculate correction
                     lastRow = ISRTTable(end, 2:end);
                     values = table2array(lastRow);
                     obj.RTCorrection = median(values, 'omitnan');
                 catch
                     obj.RTCorrection = NaN;
-                    WarningPlusDb('No RT correction possible.',Parameters, 'Processing Setting');
+                    WarningPlusDb('No RT correction possible.', Parameters, 'Processing Setting');
                 end
             else
                 obj.RTCorrection = NaN;
             end
         end
-        %% Peak detection for all entries in a given dictionary (ISdic or Compdic)
+
+        %% Peak detection for all entries in a dictionary (ISdic or Compdic)
         function obj = dicpeakdetection(obj, dicname, msdata, Parameters)
             % If RT correction is NaN, default to 0 shift
             if isnan(obj.RTCorrection)
                 RTcorrectionFactor = 0;
             else
-                RTcorrectionFactor = obj.RTCorrection / 60;  % Convert seconds to minutes
+                RTcorrectionFactor = obj.RTCorrection / 60; % Convert seconds to minutes
             end
 
             % Get the target dictionary
@@ -152,6 +157,7 @@ classdef Sample
                 end
             end
         end
+
         %% MS2 spectrum check for dictionary entries (DDA only)
         function obj = dicMS2Check(obj, dicname, ms2data, Parameters)
             % Only apply MS2 checking if sample was acquired in DDA mode
@@ -175,7 +181,8 @@ classdef Sample
                 warning('MS2Check skipped: Not a DDA acquisition.');
             end
         end
-        %% Display the contents of a given dictionary (ISdic or Compdic)
+
+        %% Display the contents of a dictionary (ISdic or Compdic)
         function T = showdic(obj, dicname)
             % Access the selected dictionary
             dicMap = obj.(dicname);
@@ -193,12 +200,13 @@ classdef Sample
             T = struct2table(vertcat(entries{:}));
             disp(T);
         end
+
         %% Save core Sample metadata to the SQL database
         function toSQL(obj, Parameters)
             % Define table name and metadata format
             Tablename = 'SampleMaster';
             metatable = Parameters.database.tables.(Tablename);
-            namesInTable = metatable.Names;
+            namesInTable = metatable.Names; %#ok<NASGU>
 
             % Convert object properties to struct
             s = struct(obj);
@@ -211,10 +219,10 @@ classdef Sample
                 'ISCheck', 'ISCheck';
                 'timestamp_of_measurement', 'datetime_aq';
                 'sampling_timestamp', 'datetime_samp';
-                'RTCorrection','RTCorrection'
+                'RTCorrection', 'RTCorrection'
             };
 
-            % Construct DB-struct with renamed fields only
+            % Construct DB struct with renamed fields only
             s_db = struct();
             for i = 1:size(fieldMapping, 1)
                 origField = fieldMapping{i,1};
@@ -234,7 +242,8 @@ classdef Sample
             fclose(SQLfileID);
             runsqlfile(filepath, Parameters);
         end
-                %% Save dictionary values (ISdic or Compdic) to SQL database with size management
+
+        %% Save dictionary values (ISdic or Compdic) to SQL database with size management
         function dic2db(obj, dicname, Parameters)
             % Define maximum file size (e.g., 5 MB)
             maxSizeMB = 5;
@@ -298,38 +307,35 @@ classdef Sample
             startStr = datestr(startDate, 'yyyy-mm-dd HH:MM:SS');
 
             % Prepare plot figure
-            fig = figure('Visible','off', 'Position', [100, 100, 1300, 800]);
+            fig = figure('Visible', 'off', 'Position', [100, 100, 1300, 800]);
             sgtitle('Device Control');
             markers = repmat({'o-', '*-', 'x-', 's-', 'd-', '^-', 'v-', '>-', '<-'}, 20, 1);
             warningText = "Sample failed IS Check";
 
-            %% RT Deviation Check
+            %% RT deviation check
             [RTTable, ~] = SQLRequest(startStr, nowStr, obj.MSMode, 'foundRT', 'ISValue', '', '', Parameters);
             RTTable = filterIS(RTTable, obj.ISdic, ISKey);
-            RTTable_abs=RTTable(:,2:end);
-            sz = [1,width(RTTable)-1]; % Create Median table 
-            varType = repmat("double",1,width(RTTable)-1); 
-            medianRT = table('Size',sz,'VariableTypes',varType,'VariableNames',RTTable.Properties.VariableNames(2:end));
+
+            RTTable_abs = RTTable(:, 2:end);
+            sz = [1, width(RTTable) - 1];
+            varType = repmat("double", 1, width(RTTable) - 1);
+            medianRT = table('Size', sz, 'VariableTypes', varType, 'VariableNames', RTTable.Properties.VariableNames(2:end));
             medianRT{:,:} = NaN;
-            normRT = table('Size',sz,'VariableTypes',varType,'VariableNames',RTTable.Properties.VariableNames(2:end));
+            normRT = table('Size', sz, 'VariableTypes', varType, 'VariableNames', RTTable.Properties.VariableNames(2:end));
             normRT{:,:} = NaN;
+
             for col = RTTable.Properties.VariableNames(2:end)
                 RTTable.(col{1}) = (RTTable.(col{1}) - median(RTTable.(col{1}), 'omitnan')) * 60;
                 medianRT.(col{1}) = median(RTTable_abs.(col{1}), 'omitnan');
-
             end
-            % break if array is empty
-            % if height(RTTable)==0
-            %     return;
-            % end
-            % Normalise Retention times x/median(x)
-            lastRTs_abs = RTTable_abs{end, :}; % Last RTs in min
-            normRT = lastRTs_abs./ medianRT; % Normalised RT
 
-            lastRTs = RTTable{end, 2:end}; % Deviation in seconds
+            % Normalise retention times: x / median(x)
+            lastRTs_abs = RTTable_abs{end, :}; % last RTs in minutes
+            normRT = lastRTs_abs ./ medianRT;  % normalised RT
+
+            lastRTs = RTTable{end, 2:end}; % deviation in seconds
             valid = lastRTs(~isnan(lastRTs));
-            %lastRTs = array2table(lastRTs,'VariableNames',RTTable.Properties.VariableNames(2:end)); % Convert to table
-            
+
             inRange = (valid > Parameters.DeviceControl.RT_lowerLimit) & (valid < Parameters.DeviceControl.RT_upperLimit);
             if sum(inRange) < minimumISnumber
                 msg = sprintf('Warning: %.0f of %.0f internal standards are out of RT range', numel(valid) - sum(inRange), numel(valid));
@@ -337,12 +343,14 @@ classdef Sample
                 SampleISCheck = false;
                 warningText = [warningText, ' | ', msg];
             end
-            plotDeviceMetric(RTTable, Parameters.DeviceControl.RT_lowerLimit, Parameters.DeviceControl.RT_upperLimit, 'RT deviation / s', 'Internal Standard Retention Time Deviation', markers);
-            % Save normalized RT and deltaRT to DB
-            % Upload deviation in seconds
+
+            plotDeviceMetric(RTTable, Parameters.DeviceControl.RT_lowerLimit, Parameters.DeviceControl.RT_upperLimit, ...
+                'RT deviation / s', 'Internal Standard Retention Time Deviation', markers);
+
+            % Upload deltaRT (seconds) to DB
             filepath = newsqlfile(Parameters);
             fid = fopen(filepath, 'w');
-            for i = 1:length(RTTable.Properties.VariableNames)-1
+            for i = 1:length(RTTable.Properties.VariableNames) - 1
                 name = RTTable.Properties.VariableNames{i+1};
                 deltaVal = lastRTs(i);
                 entry = obj.ISdic(name);
@@ -353,13 +361,14 @@ classdef Sample
             end
             fclose(fid);
             runsqlfile(filepath, Parameters);
+
             % Upload normalized retention times
             filepath = newsqlfile(Parameters);
             fid = fopen(filepath, 'w');
-            for i = 1:length(RTTable.Properties.VariableNames)-1
+            for i = 1:length(RTTable.Properties.VariableNames) - 1
                 name = RTTable.Properties.VariableNames{i+1};
-                normVal = normRT(:,i);
-                normVal=table2array(normVal);
+                normVal = normRT(:, i);
+                normVal = table2array(normVal);
                 entry = obj.ISdic(name);
                 entry.normRT = normVal;
                 obj.ISdic(name) = entry;
@@ -368,22 +377,26 @@ classdef Sample
             end
             fclose(fid);
             runsqlfile(filepath, Parameters);
-            %% Mass Accuracy Check
+
+            %% Mass accuracy check
             [MACTable, ~] = SQLRequest(startStr, nowStr, obj.MSMode, 'massaccuracy', 'ISValue', '', '', Parameters);
             MACTable = filterIS(MACTable, obj.ISdic, ISKey);
 
             lastMAC = MACTable{end, 2:end};
             valid = lastMAC(~isnan(lastMAC));
             inRange = abs(valid) < Parameters.DeviceControl.massaccuracy;
+
             if sum(inRange) < minimumISnumber
                 msg = sprintf('Warning: %.0f of %.0f internal standards are out of mass accuracy range', numel(valid) - sum(inRange), numel(valid));
                 WarningPlusDb(msg, Parameters, 'Device');
                 SampleISCheck = false;
                 warningText = [warningText, ' | ', msg];
             end
-            plotDeviceMetric(MACTable, -Parameters.DeviceControl.massaccuracy, Parameters.DeviceControl.massaccuracy, 'Mass accuracy / ppm', 'Internal Standard Mass Accuracy', markers);
 
-            %% Intensity Check
+            plotDeviceMetric(MACTable, -Parameters.DeviceControl.massaccuracy, Parameters.DeviceControl.massaccuracy, ...
+                'Mass accuracy / ppm', 'Internal Standard Mass Accuracy', markers);
+
+            %% Intensity check
             [intTable, ~] = SQLRequest(startStr, nowStr, obj.MSMode, 'intensity', 'ISValue', '', '', Parameters);
             for col = intTable.Properties.VariableNames(2:end)
                 if ~obj.ISdic(col{1}).(ISKey)
@@ -400,6 +413,7 @@ classdef Sample
             lastInt = intTable{end, 2:end};
             valid = lastInt(~isnan(lastInt));
             inRange = (valid > Parameters.DeviceControl.intensity_lowerLimit) & (valid < Parameters.DeviceControl.intensity_upperLimit);
+
             if sum(inRange) < minimumISnumber
                 msg = sprintf('Warning: %.0f of %.0f internal standards are out of intensity range', numel(valid) - sum(inRange), numel(valid));
                 WarningPlusDb(msg, Parameters, 'Device');
@@ -410,7 +424,7 @@ classdef Sample
             % Save normalized intensities to DB
             filepath = newsqlfile(Parameters);
             fid = fopen(filepath, 'w');
-            for i = 1:length(intTable.Properties.VariableNames)-1
+            for i = 1:length(intTable.Properties.VariableNames) - 1
                 name = intTable.Properties.VariableNames{i+1};
                 normVal = intTable{end, i+1};
                 entry = obj.ISdic(name);
@@ -425,12 +439,13 @@ classdef Sample
             % Plot and store normalized intensity
             [normIntTable, ~] = SQLRequest(startStr, nowStr, obj.MSMode, 'normIntensities', 'ISValue', '', '', Parameters);
             normIntTable = filterIS(normIntTable, obj.ISdic, ISKey);
-            plotDeviceMetric(normIntTable, Parameters.DeviceControl.intensity_lowerLimit, Parameters.DeviceControl.intensity_upperLimit, 'Relative Intensity', 'Internal Standard Intensity', markers, true);
-            
-            % Save figure and convert to Base64
+            plotDeviceMetric(normIntTable, Parameters.DeviceControl.intensity_lowerLimit, Parameters.DeviceControl.intensity_upperLimit, ...
+                'Relative Intensity', 'Internal Standard Intensity', markers, true);
+
+            % Save figure and embed as Base64
             imgPath = fullfile(Parameters.path.program, 'src', 'mail', 'images', ...
-                    sprintf('DeviceControl_%s.png', datestr(now, 'yyyymmdd_HHMMSS')));
-            
+                sprintf('DeviceControl_%s.png', datestr(now, 'yyyymmdd_HHMMSS')));
+
             exportgraphics(fig, imgPath, 'Resolution', 600);
             imgData = fread(fopen(imgPath, 'rb'), '*uint8');
             base64 = matlab.net.base64encode(imgData);
@@ -438,11 +453,12 @@ classdef Sample
 
             % Final ISCheck status
             obj.ISCheck = ISCheckfailed(SampleISCheck, warningText, imgTag, obj, Parameters);
+
             close(fig);
             if exist(imgPath, 'file')
                 delete(imgPath);
             end
         end
-
     end
 end
+
