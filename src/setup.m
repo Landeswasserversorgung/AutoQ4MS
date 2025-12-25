@@ -1,13 +1,12 @@
 function setup()
-% SETUP  Initializes the AutoQ MATLAB environment automatically.
+%SETUP Initialize the AutoQ MATLAB environment.
 %
-%   This script:
-%     - Searches upward from this file for the first folder whose name
-%       contains "Auto"
-%     - Changes the current folder to that project root
-%     - Recursively adds all subfolders to the MATLAB path
+% This script:
+%   - Searches upward from this file for the first folder whose name contains "Auto"
+%   - Changes the current folder to that project root
+%   - Recursively adds all subfolders to the MATLAB path
 %
-%   You can run this from anywhere by typing: setup
+% You can run this from anywhere by typing: setup
 
     % 1) Determine where this file is located
     thisFile = mfilename('fullpath');
@@ -25,7 +24,7 @@ function setup()
         end
 
         if strcmp(parent, currentFolder)
-            % reached root of filesystem without finding a match
+            % Reached root of filesystem without finding a match
             break;
         end
 
@@ -34,7 +33,7 @@ function setup()
 
     if isempty(projectRoot) || ~isfolder(projectRoot)
         error('Setup:ProjectRootNotFound', ...
-              'No folder containing "Auto" found above "%s".', thisFolder);
+            'No folder containing "Auto" found above "%s".', thisFolder);
     end
 
     % 3) Change MATLAB's current folder to the project root
@@ -44,8 +43,9 @@ function setup()
     addpath(genpath(projectRoot));
 
     % 5) Print setup info
-    fprintf('✅ Auto project setup completed successfully.\n');
-    fprintf('📂 Project root: %s\n', projectRoot);
-    fprintf('➕ Paths added (recursively): %d entries\n', ...
+    fprintf('Auto project setup completed successfully.\n');
+    fprintf('Project root: %s\n', projectRoot);
+    fprintf('Paths added (recursively): %d entries\n', ...
         numel(strsplit(path, pathsep)));
 end
+
