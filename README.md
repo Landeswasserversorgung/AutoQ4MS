@@ -2,12 +2,12 @@
 
 ## About AutoQ4MS
 
-**AutoQ4MS** (Automated Quality Control for Mass Spectrometry) is a MATLAB-based tool designed for automated monitoring of internal standards in chromatography–mass spectrometry (LC–MS/MS) systems.
+**AutoQ4MS** (Automated Quality Control for Mass Spectrometry) is a [MATLAB](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab)-based tool designed for automated monitoring of internal standards in chromatography–mass spectrometry (LC–MS/MS) systems.
 
-AutoQ4MS automatically detects completed measurement files, converts them using **msconvert**, identifies internal standard peaks, and evaluates them for anomalies in:
+AutoQ4MS automatically detects completed measurement files, converts them using **msconvert**([ProteoWizard](https://proteowizard.sourceforge.io/)), identifies internal standard peaks, and evaluates them for anomalies in:
 - retention time  
 - mass accuracy  
-- signal intensity  
+- signal intensity
 
 If deviations exceed defined thresholds, the user is automatically notified.
 
@@ -15,7 +15,7 @@ The framework is designed to be highly flexible and scalable, allowing:
 - simultaneous monitoring of multiple instruments  
 - parallel supervision of multiple analytical methods  
 
-All evaluation results are systematically stored in a **PostgreSQL database**, enabling long-term tracking and trend analysis.
+All evaluation results are systematically stored in a [**PostgreSQL database**](https://www.postgresql.org), enabling long-term tracking and trend analysis.
 
 In addition to internal standard monitoring, AutoQ4MS supports tracking of additional compounds, making it suitable for **multi-target analytical workflows**.
 
@@ -36,9 +36,9 @@ This repository contains **AutoQ4MS**, developed by:
 
 ### Requirements
 
-- **MATLAB R2024a**
-- **msconvert** (ProteoWizard)
-- **PostgreSQL**
+- ([**MATLAB R2024a**](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab))
+- **msconvert** ([ProteoWizard](https://proteowizard.sourceforge.io/))
+- [**PostgreSQL database**](https://www.postgresql.org)
 - **Windows 11**
 
 A valid MATLAB license is required.
@@ -47,7 +47,7 @@ A valid MATLAB license is required.
 
 ### Automated Installation (Recommended)
 
-1. Ensure MATLAB is installed and licensed  
+1. Ensure [MATLAB](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab) is installed and licensed  
 2. Run the following file:
 
 ```cmd
@@ -68,8 +68,8 @@ The automated installation attempts to:
 
 1. Install the following manually:
 
-   * PostgreSQL
-   * msconvert
+   * [**PostgreSQL database**](https://www.postgresql.org)
+   * **msconvert**([ProteoWizard](https://proteowizard.sourceforge.io/))
 2. Start MATLAB
 3. Run:
 
