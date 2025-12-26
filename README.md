@@ -156,6 +156,7 @@ to analyze temporal behavior of internal standards.
 
 ## Parameter Table
 
+
 ### General
 
 | Parameter | Description |
@@ -163,8 +164,10 @@ to analyze temporal behavior of internal standards.
 | `MSdataending` | File extension of converted MS data files (e.g. ".mzXML") |
 | `RawMS_Format` | File extension of raw MS vendor files (e.g. ".wiff") |
 | `SampleOrder` | Order of sample processing: 0 = modification date, 1 = name (A–Z) |
-| `sampling_timestamp` | Timestamp used for sampling reference (e.g. current time or file-based) |
-| `timestamp_of_measurement` | Source of measurement timestamp (e.g. now, file metadata, creation date) |
+| `sampling_timestamp` | Definition of the sampling timestamp: options see below|
+| `timestamp_of_measurement` | Source of the measurement timestamp: options see below|
+
+options for timestamp: 0 = NaT, 1 = current system time, 2 = extract date from MS file (currently .wiff only), 3 = last modification time of MS data file minus measurement duration, 4 = last modification time of raw MS file (e.g. .wiff / .wiff2) minus measurement duration 
 
 ---
 
