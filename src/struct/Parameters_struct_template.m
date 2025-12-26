@@ -106,7 +106,6 @@ Parameters.DeviceControl.minimumISpos = 9;
 %% ========== 9. Task Manager Settings ==========
 Parameters.TaskManager.On = false;
 Parameters.TaskManager.Interval = 5;
-Parameters.TaskManager.GuiOn = true;
 
 %% ========== 10. Database Table Definitions ==========
 % SampleMaster table
