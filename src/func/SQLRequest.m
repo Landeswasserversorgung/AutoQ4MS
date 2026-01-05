@@ -93,6 +93,7 @@ function [Table, outputPath] = SQLRequest(startDate, endDate, polarity, extract,
 
     %% Read CSV output as table
     Table = readtable(outputPath);
+    delete(outputPath);
 end
 
 
