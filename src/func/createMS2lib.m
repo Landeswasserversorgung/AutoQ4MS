@@ -228,6 +228,10 @@ for i = 1:numel(matchingVars)
             if ~isempty(ms2)
                 ms2 = MS2cleanup(ms2, precursorMassTolerance, PrecursorMass, removePrecursor, minI);
 
+                if isempty(ms2)
+                    continue;
+                end
+
                 if height(ms2) == 2 && width(ms2) == 1
                     ms2 = transpose(ms2);
                 end
