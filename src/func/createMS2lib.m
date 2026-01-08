@@ -229,7 +229,7 @@ for i = 1:numel(matchingVars)
                 ms2 = MS2cleanup(ms2, precursorMassTolerance, PrecursorMass, removePrecursor, minI);
 
                 if isempty(ms2)
-                    continue;
+                    continue
                 end
 
                 if height(ms2) == 2 && width(ms2) == 1
