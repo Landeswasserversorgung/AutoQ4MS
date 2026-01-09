@@ -1,3 +1,5 @@
+<img src="img/Logo.png" align="right" width="250">
+
 # AutoQ4MS – Automated Quality Control for Mass Spectrometry
 
 ## About AutoQ4MS
