@@ -1,131 +1,103 @@
-function msconvPath = ensure_msconvert_interactive(msiUrl)
+function msconvPath = ensure_msconvert_interactive(downloadUrl)
 % ENSURE_MSCONVERT_INTERACTIVE
 % User-friendly checker/installer for ProteoWizard MSConvert on Windows.
 %
-% Behavior:
-%   - If msconvert.exe exists -> returns its full path and prepends its folder
-%     to the current MATLAB session PATH.
-%   - Else asks user: install now?
-%       * Yes  -> download official MSI, launch GUI installer, re-check afterwards.
-%       * No   -> ask user to manually browse to msconvert.exe.
-%
-% Return:
-%   msconvPath (string): full path to msconvert.exe, or "" if not set/found.
-%
-% Usage:
-%   url = "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3698364/pwiz-setup-3.0.25286.0edf8b7-x86_64.msi";
-%   msconvPath = ensure_msconvert_interactive(url);
-%
+% Uses existing find_msconvert() function.
+% Includes a simple runtime test: msconvert --version
 
-    if nargin < 1 || strlength(string(msiUrl)) == 0
-        % Fallback to a known stable MSI URL (adjust to your preferred source)
-        msiUrl = "https://mc-tca-01.s3.us-west-2.amazonaws.com/ProteoWizard/bt83/3698364/pwiz-setup-3.0.25286.0edf8b7-x86_64.msi";
+    if nargin < 1 || strlength(string(downloadUrl)) == 0
+        downloadUrl = "https://proteowizard.sourceforge.io/download.html";
     end
 
     fprintf('\n--- Checking MSConvert ---\n');
 
     % 1) Already installed?
-    msconvPath = find_msconvert();
+    msconvPath = find_msconvert();   % <-- DEINE Funktion
     if msconvPath ~= ""
-        fprintf('MSConvert found: %s\n', msconvPath);
-        addDirToSessionPath(fileparts(msconvPath));
-        return
+        if test_msconvert(msconvPath)
+            fprintf('MSConvert working: %s\n', msconvPath);
+            addDirToSessionPath(fileparts(msconvPath));
+            return
+        else
+            warning('MSConvert was found but did not run correctly.');
+        end
     end
 
-    % 2) Ask user if we should install now
+    % 2) Ask user
     choice = questdlg( ...
-        ['MSConvert was not found on this system.', newline, ...
-         'Do you want to download and open the official installer now?'], ...
+        ['MSConvert was not found or did not run correctly.', newline, ...
+         'Do you want to open the official download page now?'], ...
         'MSConvert Installation', 'Yes', 'No', 'Yes');
 
     if strcmp(choice, 'Yes')
-        % a) Download MSI into temp
-        msiFile = fullfile(tempdir, "msconvert_installer.msi");
+        % Open browser
         try
-            fprintf('Downloading installer...\n');
-            websave(msiFile, msiUrl);
-            fprintf('Saved to: %s\n', msiFile);
-        catch ME
-            warning('Download failed: %s', char(ME.message));
-            uiwait(warndlg({ ...
-                'Automatic download failed.', ...
-                'The official download page will open in your browser.', ...
-                'Please download and run the MSI manually.'}, ...
-                'Download failed'));
-            web(msiUrl, '-browser');
-            msiFile = "";
-        end
-
-        % b) Launch GUI installer
-        if msiFile ~= "" && isfile(msiFile)
+            web(downloadUrl, '-browser');
+        catch
             try
-                fprintf('Launching installer (GUI)...\n');
-                system(sprintf('start "" "%s"', msiFile));   % starts the MSI GUI
+                winopen(char(downloadUrl));
             catch
-                try
-                    winopen(msiFile);
-                catch
-                    web(msiUrl, '-browser');
-                end
+                warning('Please open this URL manually:\n%s', downloadUrl);
             end
         end
 
-        % c) Let user finish, then re-check
+        % Wait for user
         uiwait(msgbox({ ...
-            'Please complete the MSConvert setup wizard.', ...
-            'If a reboot is requested, please reboot first.', ...
+            'Please install ProteoWizard/MSConvert.', ...
             '', ...
-            'Click OK here after the installation has finished.'}, ...
-            'Continue after installation','help'));
+            'Click OK once you are finished (even if you cancelled).' }, ...
+            'Continue','help'));
 
+        % Re-check
         msconvPath = find_msconvert();
-        if msconvPath ~= ""
-            fprintf('MSConvert found after installation: %s\n', msconvPath);
+        if msconvPath ~= "" && test_msconvert(msconvPath)
             addDirToSessionPath(fileparts(msconvPath));
-            return
-        else
-            % d) Still not found -> manual browse
-            uiwait(warndlg({ ...
-                'MSConvert was still not found.', ...
-                'Please select msconvert.exe manually.'}, ...
-                'Manual selection required'));
-            msconvPath = browse_for_msconvert();
-            if msconvPath ~= ""
-                addDirToSessionPath(fileparts(msconvPath));
-                fprintf('MSConvert set manually: %s\n', msconvPath);
-            else
-                warning('MSConvert could not be set.');
-            end
+            fprintf('MSConvert found and working: %s\n', msconvPath);
             return
         end
 
-    else
-        % User chose "No" -> manual installation + browse
-        uiwait(warndlg({ ...
-            'Please install ProteoWizard/MSConvert manually using the official installer.', ...
-            'Afterwards, select msconvert.exe when prompted.'}, ...
-            'Manual installation'));
+        % Manual browse
+        uiwait(warndlg('Please select msconvert.exe manually.'));
         msconvPath = browse_for_msconvert();
-        if msconvPath ~= ""
+        if msconvPath ~= "" && test_msconvert(msconvPath)
             addDirToSessionPath(fileparts(msconvPath));
             fprintf('MSConvert set manually: %s\n', msconvPath);
         else
-            warning('MSConvert could not be set.');
+            warning('MSConvert could not be set or did not run.');
+            msconvPath = "";
         end
         return
+
+    else
+        % Manual path only
+        uiwait(warndlg({ ...
+            'Please install ProteoWizard/MSConvert manually.', ...
+            'Then select msconvert.exe.'}));
+        msconvPath = browse_for_msconvert();
+        if msconvPath ~= "" && test_msconvert(msconvPath)
+            addDirToSessionPath(fileparts(msconvPath));
+            fprintf('MSConvert set manually: %s\n', msconvPath);
+        else
+            warning('MSConvert could not be set or did not run.');
+            msconvPath = "";
+        end
     end
 end
 
-%% ----------------- Helpers -----------------
+%% ---- helpers ----
 function addDirToSessionPath(dirPath)
-% Safely prepend a folder to the PATH for the current MATLAB session.
-    newPath = string(dirPath) + ";" + string(getenv("PATH"));
-    setenv("PATH", newPath);
+    dirPath = string(dirPath);
+    if dirPath == "" || ~isfolder(dirPath), return, end
+
+    cur = string(getenv("PATH"));
+    parts = split(cur, ";");
+    if any(strcmpi(strtrim(parts), strtrim(dirPath))), return, end
+
+    setenv("PATH", dirPath + ";" + cur);
 end
 
 function p = browse_for_msconvert()
-% Prompt the user to select msconvert.exe and validate the selection.
-    [f,fp] = uigetfile({'msconvert.exe','msconvert.exe'}, 'Please select msconvert.exe');
+    [f,fp] = uigetfile({'msconvert.exe','msconvert.exe'}, 'Select msconvert.exe');
     if isequal(f,0)
         p = "";
         return
@@ -135,3 +107,18 @@ function p = browse_for_msconvert()
         p = "";
     end
 end
+
+function ok = test_msconvert(msconvPath)
+% Quick sanity check: run "msconvert --version"
+    ok = false;
+    try
+        cmd = '"' + string(msconvPath) + '" --version';
+        [st,out] = system(cmd);
+        if st == 0 && contains(lower(out), "proteowizard")
+            ok = true;
+        end
+    catch
+        ok = false;
+    end
+end
+
