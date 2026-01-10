@@ -49,8 +49,9 @@ A valid MATLAB license is required.
 
 ### Automated Installation (Recommended)
 
-1. Ensure [MATLAB](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab) is installed and licensed  
-2. Run the following file:
+1. Ensure [MATLAB](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab) is installed and licensed
+2. Download the .zip file from GitHub, extract it, and rename it "AutoQ4MS"  
+3. Run the following file:
 
 ```cmd
 installation.cmd
@@ -68,12 +69,13 @@ The automated installation attempts to:
 
 ### Manual Installation (Alternative)
 
-1. Install the following manually:
-
+1. Ensure [MATLAB](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab) is installed and licensed
+2. Install the following manually:
    * [**PostgreSQL database**](https://www.postgresql.org)
    * **msconvert**([ProteoWizard](https://proteowizard.sourceforge.io/))
-2. Start MATLAB
-3. Run:
+4. Download the .zip file from GitHub, extract it, and rename it "AutoQ4MS" 
+5. Start MATLAB
+6. Run:
 
 ```matlab
 installation
