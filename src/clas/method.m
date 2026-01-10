@@ -32,24 +32,20 @@ classdef method
         function taskmanagerupdate(obj)
             %TASKMANAGERUPDATE  Create or delete the Windows Task Scheduler entry.
             %
-            %   If Parameters.TaskManager.On is false, the scheduled task is
-            %   deleted (if it exists). If it is true, the task is created/updated.
+            %   Delete task and create if afterwarts if If Parameters.TaskManager.On is false
             %
             %   The task executes a method-specific .bat file.
 
-            taskName = ['MTS_' obj.Name '_Task'];
+            taskName = ['AutoQ4MS_' obj.Name '_Task'];
             batFilePath = fullfile(obj.Parameters.path.program, 'bat', [obj.Name '_run_Processing.bat']);
 
-            if obj.Parameters.TaskManager.On == false
-                [status, ~] = system(['schtasks /Query /TN "' taskName '"']);
-                if status == 0
-                    system(['schtasks /Delete /TN "' taskName '" /F']);
-                    fprintf('Task "%s" deleted.\n', taskName);
-                else
-                    fprintf('Task "%s" does not exist - nothing to delete.\n', taskName);
-                end
-            else
-                % Create task
+            % delete task
+            system(['schtasks /Delete /TN "' taskName '" /F'], '-echo');
+
+            % create if true 
+
+            if obj.Parameters.TaskManager.On
+              
                 interval = obj.Parameters.TaskManager.Interval;
 
                 if ~isfile(batFilePath)
