@@ -69,11 +69,39 @@ Parameters.path.MATLABexe = fullfile(matlabroot, 'bin', 'matlab.exe');
 Parameters.path.proteoWizard = ensure_msconvert_interactive();
 Parameters.path.psqlExe = ensure_postgres_present_interactive();
 
-%% Optional: Edit Parameters via GUI
-editedParameters = editParametersGUI(Parameters);
-if numel(editedParameters) > 0
+%% Edit Parameters via GUI and test database connection
+
+while true
+
+    editedParameters = editParametersGUI(Parameters);
+    if isempty(editedParameters)
+        error('Installation aborted by user (parameter editing cancelled).');
+    end
     Parameters = editedParameters;
+
+    % ---- Test DB connection ----
+    [ok, errMsg] = testDatabaseConnection_sql(Parameters);
+
+    if ok
+        disp('Database connection successful.');
+        break;
+    end
+
+    % ---- Error dialog with choice ----
+    choice = questdlg( ...
+        sprintf(['Database connection failed.\n\n%s\n\n' ...
+                 'Please check the database parameters.'], errMsg), ...
+        'Database Connection Error', ...
+        'Edit Parameters', 'Abort Installation', ...
+        'Edit Parameters');
+
+    if strcmp(choice, 'Abort Installation') || isempty(choice)
+        error('Installation aborted: database connection could not be established.');
+    end
+
+    % otherwise: loop again → editParametersGUI
 end
+
 
 % Save potentially updated parameters
 save(fullfile(Parameters.path.program, 'data', 'Import', 'methods', 'Parameters.mat'), 'Parameters');
@@ -166,3 +194,51 @@ function tf = isUserAdmin()
     end
 end
 
+function [ok, errMsg] = testDatabaseConnection_sql(Parameters)
+%TESTDATABASECONNECTION_SQL Testet die PostgreSQL-Verbindung direkt über psql
+%
+% Inputs:
+%   Parameters - Struct mit folgenden Feldern:
+%       Parameters.database.host
+%       Parameters.database.port
+%       Parameters.database.user
+%       Parameters.database.password
+%       Parameters.database.name
+%       Parameters.path.psqlExe
+%
+% Outputs:
+%   ok      - true, wenn Verbindung erfolgreich
+%   errMsg  - Fehlermeldung, falls Verbindung fehlschlägt
+
+    ok = false;
+    errMsg = "";
+
+    try
+        % --- Setze Passwort für non-interactive login ---
+        setenv('PGPASSWORD', Parameters.database.password);
+
+        % --- Baue Command ---
+        cmd = sprintf('"%s" -h %s -p %s -U %s -d %s -v ON_ERROR_STOP=1 -c "SELECT 1;"', ...
+                      Parameters.path.psqlExe, ...
+                      Parameters.database.host, ...
+                      Parameters.database.port, ...
+                      Parameters.database.username, ...
+                      Parameters.database.dbname);
+
+        % --- Führe aus ---
+        [status, cmdout] = system(cmd);
+
+        % --- Prüfe Ergebnis ---
+        if status == 0
+            ok = true;
+        else
+            errMsg = cmdout;
+        end
+
+    catch ME
+        errMsg = ME.message;
+    end
+
+    % --- Passwort wieder löschen ---
+    setenv('PGPASSWORD','');
+end
