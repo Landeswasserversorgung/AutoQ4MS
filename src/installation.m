@@ -65,6 +65,7 @@ if ~exist(folderPath, 'dir')
 end
 
 %% ProteoWizard / MSConvert and PostgreSQL (interactive)
+Parameters.path.MATLABexe = fullfile(matlabroot, 'bin', 'matlab.exe');
 Parameters.path.proteoWizard = ensure_msconvert_interactive();
 Parameters.path.psqlExe = ensure_postgres_present_interactive();
 
