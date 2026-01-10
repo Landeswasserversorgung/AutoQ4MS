@@ -112,7 +112,7 @@ function ok = test_msconvert(msconvPath)
 % Quick sanity check: run "msconvert --version"
     ok = false;
     try
-        cmd = '"' + string(msconvPath) + '" --version';
+        cmd = '"' + string(msconvPath) + '" --help';
         [st,out] = system(cmd);
         if st == 0 && contains(lower(out), "proteowizard")
             ok = true;
