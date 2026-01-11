@@ -312,6 +312,29 @@ For theoretical background and validation, please refer to the associated public
 > **AutoQ4MS: Automated Quality Control for Mass Spectrometry Using Internal Standards**,
 > Journal / Conference, Year.
 
+
+---
+
+## Third-Party Code
+
+AutoQ4MS includes or adapts third-party software components as listed below.
+
+### zmat (Qianqian Fang) — used file: `zmat.m, zipmat.mexw64, zipmat.mexmaci64, zipmat.mexa64`
+- Project: ZMat (portable data compression/decompression toolbox for MATLAB/GNU Octave)
+- Author: Qianqian Fang
+- Source: https://github.com/fangq/zmat/tree/master
+- License: GNU General Public License v3 (GPL-3.0)
+- Usage in AutoQ4MS: Used for compression/decompression functionality (e.g., zlib-compressed data handling) via `zmat.m`.
+
+### AriumMS (Adrian Haun) — used file: `readmzXML.m`
+- Project: AriumMS
+- Copyright: (c) 2022 Adrian Haun
+- Source: https://github.com/AdrianHaun/AriumMS
+- License: BSD 3-Clause License
+- Usage in AutoQ4MS: `readmzXML.m` adapted for reading mzXML files and extracting scan/intensity/retention time data.
+
+Third-party license texts are provided in the `THIRD_PARTY_LICENSES/` directory, and all third-party code is used in accordance with its respective license terms.
+
 ---
 
 ## Contact
