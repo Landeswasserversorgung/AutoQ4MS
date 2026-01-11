@@ -78,6 +78,7 @@ hWait = waitbar(0, 'Initializing ...', ...
     'Name', 'Building MS2 Library', ...
     'CreateCancelBtn', 'setappdata(gcbf,''canceling'',true)');
 setappdata(hWait, 'canceling', false);
+
 cleanupWB = onCleanup(@() (exist('hWait','var') && isvalid(hWait)) && delete(hWait)); %#ok<NASGU>
 
 %% Main processing loop
@@ -94,7 +95,8 @@ for k = 1:nFiles
     tgtPath = fullfile(folder, base + ".mzXML");
 
     % Update progress
-    waitbar((k-1)/nFiles, hWait, sprintf('(%d/%d) Checking/Converting: %s', k, nFiles, base));
+    msg = sprintf('(%d/%d) Checking/Converting: %s', k, nFiles, base);
+    waitbar((k-1)/nFiles, hWait,  msg);
 
     % Resolve or convert file
     if exist(tgtPath, 'file')

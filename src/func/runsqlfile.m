@@ -18,7 +18,7 @@ function runsqlfile(filepath, Parameters)
 %                  Parameters.path.program
 %
 
-    disp('Saving data in the database');
+    %disp('Saving data in the database');
 
     try
         % Provide password to psql via environment variable (session scope)
@@ -42,7 +42,7 @@ function runsqlfile(filepath, Parameters)
             if contains(cmdout, 'FEHLER') || contains(cmdout, 'ERROR')
                 error('Error executing SQL commands.');
             else
-                disp('SQL commands executed successfully.');
+                disp('SQL commands executed successfully - data was saved.');
             end
         else
             error('Error executing SQL commands.');
