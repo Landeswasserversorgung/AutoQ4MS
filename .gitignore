@@ -40,6 +40,8 @@ resources/
 
 *.sql
 *.png
+!Logo.png
+!Logo_header.png
 *.csv
 *.log
 !PivotQueryTemplate.sql
@@ -48,6 +50,7 @@ resources/
 !InternalStandards_template.xlsx
 *.html
 !emailstartTemplate.html
+!emailstartTemplate_LW.html
 *.mat
 *.bat
 !template.bat
