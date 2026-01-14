@@ -38,8 +38,8 @@ This repository contains **AutoQ4MS**, developed by:
 
 ### Requirements
 
-- ([**MATLAB R2024a**](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab))
-- **msconvert** ([ProteoWizard](https://proteowizard.sourceforge.io/))
+- [**MATLAB R2024a**](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab)
+- **msconvert**  ([ProteoWizard](https://proteowizard.sourceforge.io/))
 - [**PostgreSQL database**](https://www.postgresql.org)
 - **Windows 11**
 
