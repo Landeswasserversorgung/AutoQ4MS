@@ -57,7 +57,7 @@ A valid MATLAB license is required.
 installation.cmd
 ````
 
-3. Follow the on-screen instructions
+4. Follow the on-screen instructions
 
 The automated installation attempts to:
 
