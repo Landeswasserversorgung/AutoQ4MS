@@ -324,7 +324,10 @@ AutoQ4MS includes or adapts third-party software components as listed below.
 - Author: Qianqian Fang
 - Source: https://github.com/fangq/zmat/tree/master
 - License: GNU General Public License v3 (GPL-3.0)
-- Usage in AutoQ4MS: Used for compression/decompression functionality (e.g., zlib-compressed data handling) via `zmat.m`.
+- Usage in AutoQ4MS: Used for compression/decompression functionality (e.g., zlib-compressed data handling).
+  Precompiled MEX binaries are included; corresponding source code is available in the original ZMat repository:
+  https://github.com/fangq/zmat
+
 
 ### AriumMS (Adrian Haun) — used file: `readmzXML.m`
 - Project: AriumMS
