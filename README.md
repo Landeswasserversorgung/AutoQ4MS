@@ -345,8 +345,8 @@ For questions or support, please contact the authors via the repository.
 
 ## License
 
-This project is released under the **MIT License**.
-See the `LICENSE` file for full details.
+AutoQ4MS is released under the GNU General Public License v3.0 (GPL-3.0).
+See the LICENSE file for details.
 
 ```
 
