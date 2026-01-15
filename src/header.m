@@ -54,7 +54,7 @@ altHeader3 = [ ...
 
 
     % Dateinamen für alternative Header definieren
-    alt1 = {'special1.m', 'tool1.m'};
+    alt1 = {'cosineMS2.m', 'createMS2lib.m', 'mail2_2.m', 'mergetable.m', 'MS2cleanup.m'};
     alt2 = {'zmat.m'};
     alt3 = {'readmzXML.m','untitled2.m'};
 
