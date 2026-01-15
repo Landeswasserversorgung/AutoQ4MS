@@ -38,8 +38,8 @@ This repository contains **AutoQ4MS**, developed by:
 
 ### Requirements
 
-- ([**MATLAB R2024a**](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab))
-- **msconvert** ([ProteoWizard](https://proteowizard.sourceforge.io/))
+- [**MATLAB R2024a**](https://de.mathworks.com/products/matlab.html?s_tid=hp_hero_matlab)
+- **msconvert**  ([ProteoWizard](https://proteowizard.sourceforge.io/))
 - [**PostgreSQL database**](https://www.postgresql.org)
 - **Windows 11**
 
@@ -57,7 +57,7 @@ A valid MATLAB license is required.
 installation.cmd
 ````
 
-3. Follow the on-screen instructions
+4. Follow the on-screen instructions
 
 The automated installation attempts to:
 
@@ -324,7 +324,10 @@ AutoQ4MS includes or adapts third-party software components as listed below.
 - Author: Qianqian Fang
 - Source: https://github.com/fangq/zmat/tree/master
 - License: GNU General Public License v3 (GPL-3.0)
-- Usage in AutoQ4MS: Used for compression/decompression functionality (e.g., zlib-compressed data handling) via `zmat.m`.
+- Usage in AutoQ4MS: Used for compression/decompression functionality (e.g., zlib-compressed data handling).
+  Precompiled MEX binaries are included; corresponding source code is available in the original ZMat repository:
+  https://github.com/fangq/zmat
+
 
 ### AriumMS (Adrian Haun) — used file: `readmzXML.m`
 - Project: AriumMS
@@ -345,8 +348,8 @@ For questions or support, please contact the authors via the repository.
 
 ## License
 
-This project is released under the **MIT License**.
-See the `LICENSE` file for full details.
+AutoQ4MS is released under the GNU General Public License v3.0 (GPL-3.0).
+See the LICENSE file for details.
 
 ```
 
