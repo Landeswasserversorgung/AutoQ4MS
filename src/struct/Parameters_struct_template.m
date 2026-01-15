@@ -44,9 +44,10 @@ Parameters.path.CompExcel = fullfile(Parameters.path.program, 'data', 'Import', 
 
 %% ========== 2. E-Mail Notification Settings ==========
 Parameters.Mail.On = false;
+
 Parameters.Mail.Receiver = [""];
 Parameters.Mail.Sender = "";
-
+Parameters.Mail.SmtpServer = ' -SmtpServer smtp.gmail.com'; % Gmail: smtp.gmail.com; 
 %% ========== 3. Database Configuration ==========
 Parameters.database.host = '';     % should be localhost
 Parameters.database.port = '';     % should be 5432

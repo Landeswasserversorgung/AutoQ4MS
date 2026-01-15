@@ -358,6 +358,7 @@ classdef Sample
                 obj.ISdic(name) = entry;
                 cmd = createSimpleSQLUpdateCommand(Parameters.database.schema, 'ISValue', 'deltaRT', deltaVal, {'ID', name; 'SampID', obj.ID});
                 fprintf(fid, '%s\n', cmd);
+
             end
             fclose(fid);
             runsqlfile(filepath, Parameters);

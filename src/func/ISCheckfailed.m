@@ -62,12 +62,8 @@ function Sample = ISCheckfailed(DeviceControlCheck, WarningMassage, DeviceContro
             fclose(fileIDISMail);
 
             if Parameters.Mail.On
-                try
-                    sendmail(Parameters.Mail.Sender, Parameters.Mail.Receiver, 'Sample IS-Check failed', emailfilepath);
-                catch
-                    % Backup mailing function
-                    mail2_2(Parameters.Mail.Receiver, "Sample IS-Check failed", "Sample IS-Check failed", emailfilepath);
-                end
+                % mailing function
+                mail2_2(Parameters.Mail.Sender, Parameters.Mail.SmtpServer, Parameters.Mail.Receiver, "Sample IS-Check failed", "Sample IS-Check failed", emailfilepath);
             end
 
             delete(emailfilepath);

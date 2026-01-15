@@ -6,6 +6,6 @@ load('data\Import\methods\Parameters.mat');
 %%
 % Processing 
 %methodPath = fullfile(Parameters.path.program,'data','Import', 'methods', ['anr125_60d_p005_bf_override_ischeck_bothways', '.mat']);
-methodPath = fullfile(Parameters.path.program,'data','Import', 'methods', 'test.mat');
+methodPath = fullfile(Parameters.path.program,'data','Import', 'methods', 'test05.mat');
 processing(methodPath); 
 

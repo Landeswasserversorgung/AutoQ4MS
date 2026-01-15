@@ -20,7 +20,9 @@ function sqlCmd = createSimpleSQLUpdateCommand(schemaName, tableName, columnName
 %
 
     % Format SET value
-    if isnumeric(value)
+    if isnan(value)
+        valStr = 'NULL';
+    elseif isnumeric(value)
         valStr = num2str(value);
     elseif ischar(value) || isstring(value)
         valStr = ['''' char(value) ''''];

@@ -33,7 +33,7 @@ function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
 
     % Convert datenum to datetime and store back into srcContents(i).date (char)
     dates = [srcContents.datenum];
-    datetimeArray = datetime(dates, 'ConvertFrom', 'datenum');
+    datetimeArray = datetime(dates, 'ConvertFrom', 'datenum', 'Format', 'dd-MM-yyyy HH:mm:ss');
     datetimeArray = transpose(datetimeArray);
 
     for k = 1:numel(datetimeArray)
@@ -75,9 +75,10 @@ function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
         else
             % Check if the file was modified more than 1 minute ago
             try
-                fileDateTime = datetime(srcContents(i).date, 'InputFormat', 'dd-MMM-yyyy HH:mm:ss');
+                fileDateTime = datetime(srcContents(i).date, 'InputFormat', 'dd-MM-yyyy HH:mm:ss');
             catch
-                fileDateTime = datetime(srcContents(i).date, 'InputFormat', 'dd-MMM-yyyy HH:mm:ss', 'Locale', 'de_DE');
+                fileDateTime = datetime(srcContents(i).date, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+                %fileDateTime = datetime(srcContents(i).date, 'InputFormat', 'dd-MMM-yyyy HH:mm:ss', 'Locale', 'de_DE');
             end
 
             if minutes(datetime('now') - fileDateTime) < 1
