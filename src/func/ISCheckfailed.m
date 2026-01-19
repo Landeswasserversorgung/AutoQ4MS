@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function Sample = ISCheckfailed(DeviceControlCheck, WarningMassage, DeviceControlhtmlImageTag, Sample, Parameters)
 %ISCHECKFAILED  Update IS check status and trigger warning email/logging on failure.
 %
@@ -81,5 +89,3 @@ function Sample = ISCheckfailed(DeviceControlCheck, WarningMassage, DeviceContro
         runsqlfile(filepath, Parameters);
     end
 end
-
-

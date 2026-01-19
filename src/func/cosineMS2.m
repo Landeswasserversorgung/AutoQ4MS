@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Michael Mohr
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function [cosineScore, fragMatchSummary] = cosineMS2(spectra1, spectra2, binWidth, binOffset, threshold, massTolerance_ppm, removePrecursor, ms2PrecursorMass)
 %COSINEMS2  Compute cosine similarity between two MS/MS spectra.
 %   Calculates a binned cosine similarity between a sample spectrum (spectra1)
@@ -135,4 +143,3 @@ function [cosineScore, fragMatchSummary] = cosineMS2(spectra1, spectra2, binWidt
     cosineScore = cosine_similarity;
 
 end
-

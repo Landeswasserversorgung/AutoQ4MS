@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function [Table, outputPath] = SQLRequest(startDate, endDate, polarity, extract, Table, ISCheck, Type, Parameters)
 %SQLREQUEST  Execute a templated SQL pivot query via psql and return the result as a table.
 %
@@ -95,5 +103,3 @@ function [Table, outputPath] = SQLRequest(startDate, endDate, polarity, extract,
     Table = readtable(outputPath);
     delete(outputPath);
 end
-
-

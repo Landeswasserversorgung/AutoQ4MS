@@ -1,3 +1,12 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Original Function : zmat
+% Original Author   : Qianqian Fang
+% Created           : 04/30/2019
+% Source Toolbox    : ZMAT (https://github.com/fangq/zmat)
+% License           : GNU General Public License v3 (GPL-3.0) see THIRD_PARTY_LICENSES/LICENSE_zmat_Qianqian_Fang.txt
+% Note              : Third-party component included with AutoQ4MS.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function varargout = zmat(varargin)
 %
 % output=zmat(input)

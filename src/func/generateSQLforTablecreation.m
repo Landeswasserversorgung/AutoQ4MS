@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function SQLCommand = generateSQLforTablecreation(tableMeta, tableName, schemaName)
 %GENERATESQLFORTABLECREATION  Generate a SQL CREATE TABLE statement for PostgreSQL.
 %   SQLCommand = generateSQLforTablecreation(tableMeta, tableName, schemaName)
@@ -64,5 +72,3 @@ function SQLCommand = generateSQLforTablecreation(tableMeta, tableName, schemaNa
     % Close CREATE TABLE statement
     SQLCommand = sprintf('%s );', SQLCommand);
 end
-
-

@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function [RT_peak_max_min, peak_max_intensity, noisewindow, peakwindow, noise, NoiseCheck, baseline] = MS1Check( ...
     scanTimes, ionIntensities, Parameters, Component_RT, isblank)
 %MS1CHECK  Evaluate an MS1 extracted ion chromatogram (EIC) peak against noise criteria.
@@ -145,6 +153,3 @@ function [RT_peak_max_min, peak_max_intensity, noisewindow, peakwindow, noise, N
         NoiseCheck = false;
     end
 end
-
-
-

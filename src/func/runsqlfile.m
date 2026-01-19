@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function runsqlfile(filepath, Parameters)
 %RUNSQLFILE  Execute SQL commands from a file using psql.
 %   runsqlfile(filepath, Parameters)
@@ -62,4 +70,3 @@ function runsqlfile(filepath, Parameters)
         warning('Error saving data in the database. The SQL command file was saved under %s', newFilePath);
     end
 end
-

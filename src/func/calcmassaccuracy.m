@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function massaccuracy = calcmassaccuracy(RT, exactmz, msdata, Parameters)
 %CALCMASSACCURACY  Compute mass accuracy (ppm) around a target m/z near a given RT.
 %   Compares a provided retention time (RT) and exact mass (exactmz) against
@@ -79,6 +87,3 @@ catch
 end
 
 end
-
-
-

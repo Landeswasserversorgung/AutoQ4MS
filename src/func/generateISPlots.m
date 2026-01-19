@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
 %GENERATEISPLOTS  Plot internal standard (IS) performance metrics over time.
 %   generateISPlots(polarity, startDate, endDate, axesStruct, Parameters)
@@ -137,6 +145,3 @@ function hideYLine(h)
 %% NOTE (DE): Hilfsfunktion – blendet yline in der Legende aus.
     set(get(get(h,'Annotation'),'LegendInformation'),'IconDisplayStyle','off');
 end
-
-
-

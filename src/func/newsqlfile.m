@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function filepath = newsqlfile(Parameters)
 %NEWSQLFILE  Generate a unique SQL file path with a timestamped filename.
 %
@@ -31,4 +39,3 @@ function filepath = newsqlfile(Parameters)
         pause(0.1);
     end
 end
-

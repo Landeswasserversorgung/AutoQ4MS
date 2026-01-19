@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function updatedParameters = editParametersGUI(inputStruct, titleName)
 %EDITPARAMETERSGUI  GUI editor for a (possibly nested) parameters struct.
 %   updatedParameters = editParametersGUI(inputStruct, titleName)
@@ -84,7 +92,7 @@ function updatedParameters = editParametersGUI(inputStruct, titleName)
                 'Callback', @(src,~) toggleLogical(field, src));
 
         elseif ischar(val) || isstring(val)
-            % 🔑 EDIT FIELD HANDLE
+            %  EDIT FIELD HANDLE
             editField = uicontrol(hFig, 'Style', 'edit', ...
                 'String', char(val), ...
                 'Position', [240, y, 340, 25], ...
@@ -228,5 +236,3 @@ end
 function s = logicalToString(b)
     if b, s = 'true'; else, s = 'false'; end
 end
-
-

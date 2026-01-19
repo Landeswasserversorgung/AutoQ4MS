@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function MS2Mode = getMS2Mode(Filename)
 %GETMS2MODE  Determine MS2 acquisition mode (DDA or DIA) from a filename.
 %
@@ -27,5 +35,3 @@ function MS2Mode = getMS2Mode(Filename)
     % If files are not named correctly, uncomment the following line:
     % MS2Mode = 'DDA';
 end
-
-

@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
 %LISTALLFINISHEDFILES  Recursively list files that appear "finished" and are not yet in destination.
 %
@@ -95,4 +103,3 @@ function newFilesPaths = ListAllFinishedFiles(srcDir, destDir)
     % Ensure output is a string array
     newFilesPaths = string(newFilesPaths);
 end
-

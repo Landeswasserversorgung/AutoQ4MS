@@ -1,3 +1,11 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Copyright © 2026 Zweckverband Landeswasserversorgung
+% Author   : Linus Straehle
+% Project  : AutoQ4MS
+% License  : % License: GNU General Public License v3.0 (GPL-3.0) or later.
+%          See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html for details.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function [sqlInsertCommand, columnsStr, valuesStr] = createSQLInsertCommand(Parameters, Tablename, Struct)
 %CREATESQLINSERTCOMMAND  Build a parametrized INSERT statement string from a struct.
 %   Uses table metadata in Parameters.database.tables.<Tablename> to validate the
@@ -142,5 +150,3 @@ function [sqlInsertCommand, columnsStr, valuesStr] = createSQLInsertCommand(Para
     % Also return valuesStr wrapped in parentheses for convenience
     valuesStr = [' (', valuesStr, ')'];
 end
-
-

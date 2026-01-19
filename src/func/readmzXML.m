@@ -1,3 +1,13 @@
+% ========================= AutoQ4MS HEADER START =========================
+% Original Function : readmzXML.m
+% Original Author   : Adrian Haun
+% Source Repository : AriumMS (stable branch)
+% Source URL        : https://github.com/AdrianHaun/AriumMS/blob/stable/sourcecode/readmzXML.m
+% License           : BSD 3-Clause License (Copyright Â© 2022 Adrian Haun) see THIRD_PARTY_LICENSES/LICENSE_AriumMS_Adrian_Haun.txt
+% Note              : Third-party component included with AutoQ4MS. Modifed by the AutoQ4MS authors
+% Modification      : Added polarity as a fixed return variable.
+% ========================== AutoQ4MS HEADER END ==========================
+
 function [ScanData, retentionTime,polarity, varargout] = readmzXML(DataPath, varargin)
 %% reads mzXML files and outputs mz, Intensity and time data
 % .mzXML files can be 32bit and 64bit encoded and can use zlib compression
@@ -36,7 +46,7 @@ end
 try
     doc = xmlread(DataPath);
 catch
-    error('Fehler beim Lesen der XML-Datei. Überprüfen Sie den Pfad und die Datei.');
+    error('Fehler beim Lesen der XML-Datei. ÃœberprÃ¼fen Sie den Pfad und die Datei.');
 end
 
 doc = xmlread(DataPath);
