@@ -47,7 +47,7 @@ Parameters.Mail.On = false;
 
 Parameters.Mail.Receiver = [""];
 Parameters.Mail.Sender = "";
-Parameters.Mail.SmtpServer = ' -SmtpServer smtp.gmail.com'; % Gmail: smtp.gmail.com; 
+Parameters.Mail.SmtpServer = 'smtp.gmail.com'; % Gmail: smtp.gmail.com; 
 %% ========== 3. Database Configuration ==========
 Parameters.database.host = '';     % should be localhost
 Parameters.database.port = '';     % should be 5432

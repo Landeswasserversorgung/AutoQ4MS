@@ -207,7 +207,7 @@ options for timestamp: 0 = NaT, 1 = current system time, 2 = extract date from M
 | `On` | Enable or disable e-mail notifications |
 | `Receiver` | List of e-mail recipients |
 | `Sender` | Sender e-mail address |
-| `SmtpServer` | String to define SMTP server to send emails. Use ' -SmtpServer smpt.gmail.com' to use autoq4ms@gmail.com |
+| `SmtpServer` | URL of SMTP server to send emails. Use 'smpt.gmail.com' to use autoq4ms@gmail.com |
 
 ---
 
