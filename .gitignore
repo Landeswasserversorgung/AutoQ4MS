@@ -58,4 +58,5 @@ resources/
 
 # In .gitignore
 src/struct/Parameters_struct.m
+src/header.m
 

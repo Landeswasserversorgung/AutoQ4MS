@@ -50,10 +50,10 @@ Parameters.Mail.Sender = "autoq4ms@gmail.com";
 Parameters.Mail.SmtpServer = 'smtp.gmail.com'; % Gmail: smtp.gmail.com; 
 Parameters.Mail.Password = 'your_password'; % For Gmail bot account, not required for Powershell
 %% ========== 3. Database Configuration ==========
-Parameters.database.host = '';     % should be localhost
-Parameters.database.port = '';     % should be 5432
-Parameters.database.dbname = '';
-Parameters.database.username = ''; % should be postgres
+Parameters.database.host = 'localhost';     % should be localhost
+Parameters.database.port = '5432';     % should be 5432
+Parameters.database.dbname = 'AutoQ4MS';
+Parameters.database.username = 'postgres'; % should be postgres
 Parameters.database.password = ''; % should be encrypted
 Parameters.database.schema = 'parameters'; % do not change
 
