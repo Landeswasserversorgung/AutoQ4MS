@@ -46,8 +46,9 @@ Parameters.path.CompExcel = fullfile(Parameters.path.program, 'data', 'Import', 
 Parameters.Mail.On = false;
 
 Parameters.Mail.Receiver = [""];
-Parameters.Mail.Sender = "";
+Parameters.Mail.Sender = "autoq4ms@gmail.com";
 Parameters.Mail.SmtpServer = 'smtp.gmail.com'; % Gmail: smtp.gmail.com; 
+Parameters.Mail.Password = 'your_password'; % For Gmail bot account, not required for Powershell
 %% ========== 3. Database Configuration ==========
 Parameters.database.host = '';     % should be localhost
 Parameters.database.port = '';     % should be 5432

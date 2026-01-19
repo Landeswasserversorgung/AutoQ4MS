@@ -63,7 +63,7 @@ function Sample = ISCheckfailed(DeviceControlCheck, WarningMassage, DeviceContro
 
             if Parameters.Mail.On
                 % mailing function
-                mail2_2(Parameters.Mail.Sender, Parameters.Mail.SmtpServer, Parameters.Mail.Receiver, "Sample IS-Check failed", "Sample IS-Check failed", emailfilepath);
+                mail2_2(Parameters.Mail.Sender, Parameters.Mail.Password, Parameters.Mail.SmtpServer, Parameters.Mail.Receiver, "Sample IS-Check failed", "Sample IS-Check failed", emailfilepath);
             end
 
             delete(emailfilepath);

@@ -1,4 +1,4 @@
-function mail2_2(sender,smtpServer, user,...
+function mail2_2(sender,pw,smtpServer, user,...
                   subject,...
                   message,...
                   attachment)
@@ -20,7 +20,7 @@ function mail2_2(sender,smtpServer, user,...
 %     - The email body is sent as HTML.
 %     - Requires PowerShell and access to the SMTP server.
 %
-if ~contains(smtpServer, "gmail.com")
+if ~strcmp(sender, "autoq4ms@gmail.com")
     % Convert message cell array to HTML body
     M1 = strjoin(message, '<br />');
     if ischar(user)
@@ -42,10 +42,15 @@ if ~contains(smtpServer, "gmail.com")
 else
     % --- Configuration ---
 % Gmail bot
-gmail_sender = 'autoq4ms@gmail.com'; 
-% App Password
-gmail_app_password = 'oxjkcfmaowdiquxc'; 
 
+% App Password
+if strcmp(sender, "autoq4ms@gmail.com")
+    gmail_app_password = 'oxjkcfmaowdiquxc'; 
+    gmail_sender = 'autoq4ms@gmail.com'; 
+else
+    gmail_app_password = pw;
+    gmail_sender = sender; 
+end
 % Make sure Body is a Character-Vector
 M1 = char(strjoin(message, '<br />'));
 
