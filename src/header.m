@@ -1,5 +1,5 @@
 setup()
-rootDir ='C:\Users\vboxuser\MATLAB\AutoQ4MS';
+rootDir ="C:\Users\vboxuser\MATLAB\AutoQ4MS";
 
 update_header(rootDir)
 function update_header(rootDir)
@@ -49,7 +49,7 @@ altHeader3 = [ ...
     '% Source URL        : https://github.com/AdrianHaun/AriumMS/blob/stable/sourcecode/readmzXML.m' nl ...
     '% License           : BSD 3-Clause License (Copyright © 2022 Adrian Haun) see THIRD_PARTY_LICENSES/LICENSE_AriumMS_Adrian_Haun.txt' nl ...
     '% Note              : Third-party component included with AutoQ4MS. Modifed by the AutoQ4MS authors' nl ...
-    '% Modification      : Added polarity as a fixed return variable.'
+    '% Modification      : Added polarity as a fixed return variable.' nl ...
     '% ========== AutoQ4MS HEADER END ============' nl nl ];
 
 
@@ -121,6 +121,8 @@ function insertOrUpdateHeader(filePath, newHeader)
         txt   = [txt(1:s-1), txt(e+1:end)];
         idx   = strfind(txt, startM);
     end
+
+    txt = regexprep(txt, '^[ \t]*[\r\n]+', '');
 
     % 3) Neuen Header voranstellen
     updated = [newHeader, txt];
