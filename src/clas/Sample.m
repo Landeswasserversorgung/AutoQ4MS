@@ -336,6 +336,7 @@ classdef Sample
                 RTTable.(col{1}) = (RTTable.(col{1}) - median(RTTable.(col{1}), 'omitnan')) * 60;
                 medianRT.(col{1}) = median(RTTable_abs.(col{1}), 'omitnan');
             end
+            
 
             % Normalise retention times: x / median(x)
             lastRTs_abs = RTTable_abs{end, :}; % last RTs in minutes
@@ -343,10 +344,17 @@ classdef Sample
 
             lastRTs = RTTable{end, 2:end}; % deviation in seconds
             valid = lastRTs(~isnan(lastRTs));
+            % Count detected standards
+             if numel(valid) < minimumISnumber
+                msg = sprintf('Warning: Only %.0f of %.0f expected internal standards were detected', numel(valid), minimumISnumber);
+                WarningPlusDb(msg, Parameters, 'Device');
+                SampleISCheck = false;
+                warningText = [warningText, ' | ', msg];
+            end
 
             inRange = (valid > Parameters.DeviceControl.RT_lowerLimit) & (valid < Parameters.DeviceControl.RT_upperLimit);
-            if sum(inRange) < minimumISnumber
-                msg = sprintf('Warning: %.0f of %.0f internal standards are out of RT range', numel(valid) - sum(inRange), numel(valid));
+            if sum(inRange) < numel(valid)
+                msg = sprintf('Warning: %.0f of %.0f detected internal standards are out of RT range', numel(valid) - sum(inRange), numel(valid));
                 WarningPlusDb(msg, Parameters, 'Device');
                 SampleISCheck = false;
                 warningText = [warningText, ' | ', msg];
@@ -395,8 +403,8 @@ classdef Sample
             valid = lastMAC(~isnan(lastMAC));
             inRange = abs(valid) < Parameters.DeviceControl.massaccuracy;
 
-            if sum(inRange) < minimumISnumber
-                msg = sprintf('Warning: %.0f of %.0f internal standards are out of mass accuracy range', numel(valid) - sum(inRange), numel(valid));
+            if sum(inRange) < numel(valid)
+                msg = sprintf('Warning: %.0f of %.0f detected internal standards are out of mass accuracy range', numel(valid) - sum(inRange), numel(valid));
                 WarningPlusDb(msg, Parameters, 'Device');
                 SampleISCheck = false;
                 warningText = [warningText, ' | ', msg];
@@ -423,8 +431,8 @@ classdef Sample
             valid = lastInt(~isnan(lastInt));
             inRange = (valid > Parameters.DeviceControl.intensity_lowerLimit) & (valid < Parameters.DeviceControl.intensity_upperLimit);
 
-            if sum(inRange) < minimumISnumber
-                msg = sprintf('Warning: %.0f of %.0f internal standards are out of intensity range', numel(valid) - sum(inRange), numel(valid));
+            if sum(inRange) < numel(valid)
+                msg = sprintf('Warning: %.0f of %.0f detected internal standards are out of intensity range', numel(valid) - sum(inRange), numel(valid));
                 WarningPlusDb(msg, Parameters, 'Device');
                 SampleISCheck = false;
                 warningText = [warningText, ' | ', msg];
