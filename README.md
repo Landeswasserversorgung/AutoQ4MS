@@ -208,7 +208,7 @@ options for timestamp: 0 = NaT, 1 = current system time, 2 = extract date from M
 | `Receiver` | List of e-mail recipients |
 | `Sender` | Sender e-mail address, use autoq4ms@gmail.com to use our generic email bot |
 | `SmtpServer` | URL of SMTP server to send emails. Not required for autoq4ms@gmail.com |
-| `Passowrd` | App Password for Google bot account. Insert anything to use autoq4ms@gmail.com. To use a different account, use the corresponding app password. Not required for your own |
+| `Passowrd` | App Password for Google bot account. Insert anything to use autoq4ms@gmail.com. To use a different account, use the corresponding app password |
 
 ---
 
