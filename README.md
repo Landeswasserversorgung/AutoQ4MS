@@ -310,9 +310,9 @@ options for timestamp: 0 = NaT, 1 = current system time, 2 = extract date from M
 
 For theoretical background and validation, please refer to the associated publication:
 
-> Strähle L., Mohr M.,
-> **AutoQ4MS: Automated Quality Control for Mass Spectrometry Using Internal Standards**,
-> Journal / Conference, Year.
+> coming soon 
+> **Automated near real-time QC for LC-HRMS**,
+
 
 
 ---
