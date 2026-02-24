@@ -306,10 +306,10 @@ options for timestamp: 0 = NaT, 1 = current system time, 2 = extract date from M
 
 ---
 
-## References
+## References / How to cite
 
-For theoretical background and validation, please refer to the associated publication:
-> **Automated Near Real-Time QC for LC-HRMS**,
+For theoretical background and validation, please refer to the associated publication and cite it when using AutoQ4MS:
+> **Automated Near Real-Time QC for LC-HRMS**:
  https://doi.org/10.1002/rcm.70052
 
 
