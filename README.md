@@ -309,10 +309,8 @@ options for timestamp: 0 = NaT, 1 = current system time, 2 = extract date from M
 ## References
 
 For theoretical background and validation, please refer to the associated publication:
-
-> coming soon 
-> **Automated near real-time QC for LC-HRMS**,
-
+> **Automated Near Real-Time QC for LC-HRMS**,
+ https://doi.org/10.1002/rcm.70052
 
 
 ---
